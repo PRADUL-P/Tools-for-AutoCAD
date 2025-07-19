@@ -1,31 +1,49 @@
-# 🔒 Hide_Show AutoCAD LISP Tool
+# 🧰 Hide & Isolate AutoCAD Objects – AutoLISP Tool
 
-This LISP script provides quick and efficient visibility control within AutoCAD using custom commands to **hide**, **isolate**, and **restore** objects.
-
----
-
-## 📌 Features
-
-- 🔹 **HH** – Hide selected objects from view.
-- 🔹 **IL** – Isolate selected objects, hiding all others.
-- 🔹 **HR** – Restore visibility of all previously hidden or isolated objects.
+This AutoLISP script introduces a set of commands for **temporarily hiding, isolating, and restoring** objects in AutoCAD.  
+It streamlines visibility control in complex drawings—making it easier to focus on specific components without clutter.
 
 ---
 
-## 🛠 Commands Overview
+## 💡 Included Commands
 
-| Command | Action                              | AutoCAD Equivalent                      |
-|---------|-------------------------------------|------------------------------------------|
-| `HH`    | Hide selected objects               | Right-click → Isolate → **Hide Objects** |
-| `IL`    | Isolate selected objects            | Right-click → Isolate → **Isolate Objects** |
-| `HR`    | Restore all object visibility       | Right-click → Isolate → **End Object Isolation** |
+| Command | Function           | Description                                       |
+|---------|--------------------|---------------------------------------------------|
+| `HH`    | Hide Objects        | Temporarily hides selected objects               |
+| `IL`    | Isolate Objects     | Hides everything except selected objects         |
+| `HR`    | Restore Visibility  | Restores all hidden/isolated objects             |
 
 ---
 
-## ✅ Usage Instructions
+## ⚙️ Shortcut Key Features
 
-1. **Load the LISP file** in AutoCAD using the `APPLOAD` command.
-2. Run any of the following commands in the command line:
-   - `HH` – Select objects to hide.
-   - `IL` – Select objects to isolate.
-   - `HR` – Unhide all hidden or isolated objects.
+- 🔹 `HH` — Quickly hide any selected objects  
+- 🔹 `IL` — Focus only on selected objects by isolating them  
+- 🔹 `HR` — Instantly restore visibility to all previously hidden/isolated items  
+
+These commands are designed for fast toggling of object visibility with minimal user input.
+
+---
+
+## 🖥️ Usage Instructions
+
+### 🧩 Step-by-Step: Load the LISP in AutoCAD
+
+1. Open **AutoCAD**
+2. Type `APPLOAD` in the command line and press `Enter`
+3. Locate and select `HIDE_SHOW.LSP`
+4. Click **Load**
+
+---
+
+## ⌨️ How to Use
+
+Once loaded, use the following shortcut commands in the command bar:
+
+- 🔹 `HH` → Select objects → Hidden  
+- 🔹 `IL` → Select objects → Others hidden (isolated)  
+- 🔹 `HR` → All hidden/isolated objects become visible again  
+
+---
+
+
