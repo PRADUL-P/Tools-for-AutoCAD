@@ -9,11 +9,11 @@ Welcome to the **Tools-for-AutoCAD** repository! This folder contains a collecti
 ```
 Tools-for-AutoCAD/
 └── LISP/
-    ├── README.md              ← You are here
-    ├── selection-tools/        ← Select similar, by layer, color, block, etc.
-    ├── xline-tools/            ← Create multiple xlines, custom angles
-    ├── hide-show-tools/        ← Temporarily hide/show selected objects
-    └── ...                     ← Future tools/extensions
+    ├── README.md  ← You are here
+    ├── SELECTION/         ← Select similar, by layer, color, block, etc.
+    ├── XLINE/             ← Create multiple xlines, custom angles
+    ├── HIDE_SHOW/         ← Temporarily hide/show selected objects
+    └── ...                ← Future tools/extensions
 ```
 
 ---
@@ -66,54 +66,18 @@ These tools are created by a practicing Civil Engineer for engineers, drafters, 
 
 ---
 
-## 📆 Included LISP Categories
+## 📂 Explore Specific Tools
 
-Below are the currently available tools grouped by functionality:
+Each toolset has its own README for detailed usage instructions:
 
-### 🔹 Selection Tools ([View Folder](./selection-tools/))
+* 🔹 [Selection Tools](./SELECTION/) – Select objects by type, color, layer, etc.
+* 🔹 [XLine Tools](./XLINE/) – Create xlines at various angles and positions
+* 🔹 [Hide/Show Tools](./HIDE_SHOW/) – Temporarily hide or restore selected objects
 
-* [`SA` / `SR`](./selection-tools/select-similar.lsp): Select all similar objects
-* [`SAT`](./selection-tools/select-same-type-layer.lsp): Select same type on same layer
-* [`SAL`](./selection-tools/select-same-layer.lsp): Select all objects on the same layer
-* [`SAC`](./selection-tools/select-by-color.lsp): Select by color
-* [`SAB`](./selection-tools/select-by-block.lsp): Select by block name
-* [`SAA`](./selection-tools/select-all.lsp): Select all in drawing
-* [`SLT`](./selection-tools/select-line-type.lsp): Select by line type
+> 🔗 Click any link above to view the full documentation and list of commands in that category.
 
-### 🔹 XLine Tools ([Browse](./xline-tools/))
 
-* [`XL`](./xline-tools/xline-cross.lsp): Create cross xlines
-* [`XH`](./xline-tools/xline-horizontal.lsp): Horizontal xline
-* [`XV`](./xline-tools/xline-vertical.lsp): Vertical xline
-* [`XA`](./xline-tools/xline-angle.lsp): Xlines at custom angles
 
-### 🔹 Hide/Show Tools ([Browse](./hide-show-tools/))
-
-* [`HH`](./hide-show-tools/hide-selected.lsp): Temporarily hide selected
-* [`HR`](./hide-show-tools/restore-hidden.lsp): Restore all hidden objects
-
-### 🔹 Coming Soon
-
-* Delete filtered objects
-* Batch renaming tools
-* Object alignment utilities
-
----
-
-## 🧪 Testing
-
-All commands have been tested on:
-
-* AutoCAD 2016, 2019, 2023
-* Windows 10 & 11
-
----
-
-## 📄 License
-
-This repository is open-source and licensed under the [MIT License](https://opensource.org/licenses/MIT).
-
----
 
 ## 🤝 Contributions
 
