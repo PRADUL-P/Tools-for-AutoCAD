@@ -17,28 +17,3 @@
 
 > ⚙️ Start turning your everyday CAD operations into **one-click tasks** — powered by the simplicity and strength of LISP scripting.
 
----
-
-## 📁 Folder Structure
-```bash
-tools-for-autocad/
-├── README.md
-├── LICENSE (MIT)
-├── lisp/
-│   ├── SA_SR_SelectSimilar.lsp
-│   ├── HH_HR_HideUnhide.lsp
-│   ├── XLINE_Extended.lsp
-├── docs/
-│   ├── usage-guide.md
-│   ├── screenshots/
-└── .gitignore
-```
-
-## 🔧 How to Use
-1. Open AutoCAD
-2. Load LISP file: `APPLOAD`
-3. Type the command shown in each script (e.g., `SA`, `HR`, etc.)
-4. Follow prompts in the command line
-
-## 📜 License
-MIT License — free for personal and commercial use with attribution.
