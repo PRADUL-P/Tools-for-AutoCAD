@@ -1,0 +1,25 @@
+;;; ----------------------------------------------------------
+;;; Create Similar Command for AutoCAD (Revit-style CS)
+;;; Author: ChatGPT
+;;; Date: 2025-08-13
+;;; ----------------------------------------------------------
+
+(defun c:CS ( / e ss res )
+  (vl-load-com)
+  (if (setq e (car (entsel "\nPick source object (Create Similar): ")))
+    (progn
+      (setq ss (ssadd e))          ; add picked entity to a selection set
+      (sssetfirst nil ss)          ; make it the active selection
+      (setq res (vl-catch-all-apply '(lambda () (vl-cmdf "_.ADDSELECTED"))))
+      (sssetfirst nil nil)         ; clear selection
+      (if (vl-catch-all-error-p res)
+        (prompt "\nError: ADDSELECTED not supported in this AutoCAD version.")
+      )
+    )
+    (prompt "\nNo object selected.")
+  )
+  (princ)
+)
+
+(princ "\nType CS to use Create Similar.")
+(princ)
