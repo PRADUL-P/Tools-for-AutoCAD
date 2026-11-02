@@ -1,91 +1,152 @@
-;; XLINE_ALL.LSP – Unified XLINE utilities
-;;
-;; This script consolidates all XLINE shortcut commands and the custom
-;; multi‑spaced XLINE commands (XVN and XHN) into a single file.
-;;
-;; Provided commands:
-;;   XH  – Horizontal XLINE (shortcut)
-;;   XV  – Vertical XLINE (shortcut)
-;;   XA  – Angled XLINE (shortcut)
-;;   XB  – Bisecting XLINE (shortcut)
-;;   XO  – Offset XLINE (shortcut)
-;;   XVN – Create multiple vertical or horizontal XLINEs with custom count
-;;          and spacing (user‑specified direction based on mouse movement).
-;;   XHN – Create multiple horizontal XLINEs with custom count and spacing.
-;;
-;; Load this file with APPLOAD or (load "path/to/XLINE_ALL.lsp") and use the
-;; commands directly in the AutoCAD command line.
-;; ---------------------------------------------------------------------------
-;; Shortcut commands (original functionality)
-;; ---------------------------------------------------------------------------
+;; =============================================================================
+;; XLINE_ALL.LSP – Unified Extended XLINE Utilities for AutoCAD
+;; =============================================================================
+;; Commands Included:
+;;   XH  : Quick Horizontal XLINE
+;;   XV  : Quick Vertical XLINE
+;;   XA  : Angled XLINE
+;;   XB  : Bisecting XLINE
+;;   XO  : Offset XLINE
+;;   XVN : Array multiple VERTICAL XLINEs with custom count, spacing & mouse direction
+;;   XHN : Array multiple HORIZONTAL XLINEs with custom count, spacing & mouse direction
+;; =============================================================================
+
+;; -----------------------------------------------------------------------------
+;; Basic Shortcuts
+;; -----------------------------------------------------------------------------
 
 (defun c:XH ()
-  (prompt "\n[+XH] Drawing a horizontal XLINE…")
+  (prompt "\n[+XH] Drawing a horizontal XLINE...")
   (command "._xline" "_h")
-  (princ))
+  (princ)
+)
 
 (defun c:XV ()
-  (prompt "\n[+XV] Drawing a vertical XLINE…")
+  (prompt "\n[+XV] Drawing a vertical XLINE...")
   (command "._xline" "_v")
-  (princ))
+  (princ)
+)
 
 (defun c:XA ()
-  (prompt "\n[+XA] Drawing an angled XLINE…")
+  (prompt "\n[+XA] Drawing an angled XLINE...")
   (command "._xline" "_ang")
-  (princ))
+  (princ)
+)
 
 (defun c:XB ()
-  (prompt "\n[+XB] Drawing a bisecting XLINE…")
+  (prompt "\n[+XB] Drawing a bisecting XLINE...")
   (command "._xline" "_bisect")
-  (princ))
+  (princ)
+)
 
 (defun c:XO ()
-  (prompt "\n[+XO] Drawing an offset XLINE…")
+  (prompt "\n[+XO] Drawing an offset XLINE...")
   (command "._xline" "_offset")
-  (princ))
+  (princ)
+)
 
-;; ---------------------------------------------------------------------------
-;; XVN – Multiple spaced XLINEs (vertical or horizontal)
-;; ---------------------------------------------------------------------------
+;; -----------------------------------------------------------------------------
+;; XVN – Array of Spaced Vertical XLINEs (Mouse-Direction Aware)
+;; -----------------------------------------------------------------------------
+(defun c:XVN ( / oldEcho p1 p2 n dx curPt )
+  (setq oldEcho (getvar "CMDECHO"))
+  (setvar "CMDECHO" 0)
+  (command "_.undo" "_group")
 
-(defun c:XVN ( / p1 n spacing)
-  ;; Prompt for start point
-  (setq p1 (getpoint "Pick start point for vertical XLINE: "))
-  ;; Number of lines (including the first)
-  (setq n (getint "Number of vertical XLINEs (including first): "))
-  (while (or (null n) (<= n 0))
-    (setq n (getint "Please enter a positive integer for number of XLINEs: ")))
-  ;; Spacing between lines
-  (setq spacing (getreal "Spacing between vertical XLINEs (drawing units): "))
-  (while (null spacing)
-    (setq spacing (getreal "Please enter a numeric spacing value: ")))
-  ;; Create vertical XLINEs
-  (repeat n
-    (command "_XLINE" p1 (list 0 1 0))
-    (setq p1 (list (+ (car p1) spacing) (cadr p1) (caddr p1)))
+  ;; 1. Base / Start point
+  (setq p1 (getpoint "\nSpecify start point for first vertical XLINE: "))
+  (if p1
+    (progn
+      ;; 2. Count
+      (initget 6) ; Non-zero, positive integer
+      (setq n (getint "\nEnter number of vertical XLINEs (including first) <2>: "))
+      (if (null n) (setq n 2))
+
+      ;; 3. Spacing & Direction (move cursor left/right and click or enter distance)
+      (setq p2 (getpoint p1 "\nSpecify spacing & direction (move cursor Left/Right & enter distance or click): "))
+      (if p2
+        (progn
+          (setq dx (- (car p2) (car p1)))
+          (if (equal dx 0.0 1e-6)
+            (setq dx (getdist p1 "\nLines would overlap. Enter numeric spacing distance: "))
+          )
+          (if (and dx (/= dx 0.0))
+            (progn
+              ;; Use native vertical option of _XLINE
+              (command "._xline" "_v")
+              (setq curPt p1)
+              (repeat n
+                (command "_none" curPt)
+                (setq curPt (list (+ (car curPt) dx) (cadr curPt) (caddr curPt)))
+              )
+              (command "") ; Close XLINE command properly
+              (princ (strcat "\nXVN: Created " (itoa n) " vertical XLINEs (Spacing: " (rtos (abs dx) 2 2)
+                             (if (> dx 0) " -> Right" " <- Left") ")."))
+            )
+          )
+        )
+      )
+    )
   )
-  (princ "\nXVN: Vertical XLINE creation complete.")
-  (princ))
 
-;; ---------------------------------------------------------------------------
-;; XHN – Multiple spaced horizontal XLINEs
-;; ---------------------------------------------------------------------------
+  (command "_.undo" "_end")
+  (setvar "CMDECHO" oldEcho)
+  (princ)
+)
 
-(defun c:XHN ( / p1 n spacing)
-  (setq p1 (getpoint "Pick start point for horizontal XLINE: "))
-  (setq n (getint "Number of horizontal XLINEs (including first): "))
-  (while (or (null n) (<= n 0))
-    (setq n (getint "Please enter a positive integer for number of XLINEs: ")))
-  (setq spacing (getreal "Spacing between XLINEs (Y direction, drawing units): "))
-  (while (null spacing)
-    (setq spacing (getreal "Please enter a numeric spacing value: ")))
-  (repeat n
-    (command "_XLINE" p1 (list 1 0 0))
-    (setq p1 (list (car p1) (+ (cadr p1) spacing) (caddr p1)))
+;; -----------------------------------------------------------------------------
+;; XHN – Array of Spaced Horizontal XLINEs (Mouse-Direction Aware)
+;; -----------------------------------------------------------------------------
+(defun c:XHN ( / oldEcho p1 p2 n dy curPt )
+  (setq oldEcho (getvar "CMDECHO"))
+  (setvar "CMDECHO" 0)
+  (command "_.undo" "_group")
+
+  ;; 1. Base / Start point
+  (setq p1 (getpoint "\nSpecify start point for first horizontal XLINE: "))
+  (if p1
+    (progn
+      ;; 2. Count
+      (initget 6) ; Non-zero, positive integer
+      (setq n (getint "\nEnter number of horizontal XLINEs (including first) <2>: "))
+      (if (null n) (setq n 2))
+
+      ;; 3. Spacing & Direction (move cursor up/down and click or enter distance)
+      (setq p2 (getpoint p1 "\nSpecify spacing & direction (move cursor Up/Down & enter distance or click): "))
+      (if p2
+        (progn
+          (setq dy (- (cadr p2) (cadr p1)))
+          (if (equal dy 0.0 1e-6)
+            (setq dy (getdist p1 "\nLines would overlap. Enter numeric spacing distance: "))
+          )
+          (if (and dy (/= dy 0.0))
+            (progn
+              ;; Use native horizontal option of _XLINE
+              (command "._xline" "_h")
+              (setq curPt p1)
+              (repeat n
+                (command "_none" curPt)
+                (setq curPt (list (car curPt) (+ (cadr curPt) dy) (caddr curPt)))
+              )
+              (command "") ; Close XLINE command properly
+              (princ (strcat "\nXHN: Created " (itoa n) " horizontal XLINEs (Spacing: " (rtos (abs dy) 2 2)
+                             (if (> dy 0) " -> Up" " -> Down") ")."))
+            )
+          )
+        )
+      )
+    )
   )
-  (princ "\nXHN: Horizontal XLINE creation complete.")
-  (princ))
 
-;; End of combined script
-(princ "\nXLINE_ALL loaded. Available commands: XH, XV, XA, XB, XO, XVN, XHN.\n")
+  (command "_.undo" "_end")
+  (setvar "CMDECHO" oldEcho)
+  (princ)
+)
+
+(princ "\n==================================================================")
+(princ "\n XLINE_ALL Loaded!")
+(princ "\n Commands: XH, XV, XA, XB, XO")
+(princ "\n   XVN : Array vertical XLINEs with count, spacing & mouse direction")
+(princ "\n   XHN : Array horizontal XLINEs with count, spacing & mouse direction")
+(princ "\n==================================================================\n")
 (princ)

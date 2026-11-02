@@ -1,52 +1,40 @@
-# 📐 XLINE Construction Tools – AutoLISP for AutoCAD
+# 📐 Extended XLINE Tools
 
-This AutoLISP script enables **quick drafting of construction lines (XLINEs)** in multiple orientations—horizontal, vertical, angled, bisecting, or offset.  
-It's designed to **boost drafting speed** by assigning direct shortcut commands to commonly used XLINE functions.
-
----
-
-## 💡 Included Commands
-
-| Command | Function           | Description                                                  |
-|---------|--------------------|--------------------------------------------------------------|
-| `XH`    | Horizontal XLINE   | Draws an infinite horizontal construction line               |
-| `XV`    | Vertical XLINE     | Draws an infinite vertical construction line                 |
-| `XA`    | Angled XLINE       | Prompts user to specify angle and base point                 |
-| `XB`    | Bisecting XLINE    | Creates a line bisecting two selected objects (e.g. lines)   |
-| `XO`    | Offset XLINE       | Draws an XLINE offset from an existing one by given distance |
+A collection of AutoLISP commands for drawing and arraying **Construction Lines (`XLINE`)** quickly and accurately in AutoCAD.
 
 ---
 
-## ⚙️ Shortcut Key Features
+## ⚡ Available Commands
 
-- 🧭 Instant drafting of **infinite construction lines**  
-- 🧠 Shortcut-based design for **CAD power users**  
-- ✨ Reduces the need to manually choose XLINE options each time  
-
----
-
-## 🖥️ Usage Instructions
-
-### 🧩 Step-by-Step: Load the LISP in AutoCAD
-
-1. Open **AutoCAD**
-2. Type `APPLOAD` in the command line and press `Enter`
-3. Locate and select `XLINE.LSP`
-4. Click **Load**
+| Command | Description |
+|---|---|
+| **`XVN`** | **Array Vertical XLINEs** with user-defined count, spacing, and cursor direction |
+| **`XHN`** | **Array Horizontal XLINEs** with user-defined count, spacing, and cursor direction |
+| **`XH`** | Quick Horizontal XLINE |
+| **`XV`** | Quick Vertical XLINE |
+| **`XA`** | Angled XLINE |
+| **`XB`** | Bisecting XLINE |
+| **`XO`** | Offset XLINE |
 
 ---
 
-## ⌨️ How to Use
+## 🚀 How `XVN` Works (Array Vertical XLINEs)
 
-After loading, enter any of the following commands:
+1. Type `XVN` in the command line.
+2. **Step 1 - Start Point**: Click where you want the first vertical construction line.
+3. **Step 2 - Count**: Enter the total number of lines you want (e.g., `5`).
+4. **Step 3 - Spacing & Direction**:
+   - Move your mouse to the **Right** and enter distance (e.g. `200`) $\rightarrow$ lines space to the right.
+   - Move your mouse to the **Left** and enter distance (e.g. `200`) $\rightarrow$ lines space to the left.
+   - Or click an existing snap point to measure the spacing directly!
 
-- 🔹 `XH` → Draw horizontal XLINE  
-- 🔹 `XV` → Draw vertical XLINE  
-- 🔹 `XA` → Specify angle → Draw XLINE  
-- 🔹 `XB` → Select two lines → Draw bisector  
-- 🔹 `XO` → Select XLINE → Specify offset distance  
-
-Follow AutoCAD’s prompts as needed.
+All $N$ lines are drawn perfectly vertical with exact spacing in the direction of your mouse!
 
 ---
 
+## 📥 How to Load
+
+```lisp
+(load "XLINE_ALL.lsp")
+```
+*(Or use `APPLOAD` in AutoCAD)*
