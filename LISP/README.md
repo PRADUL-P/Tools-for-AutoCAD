@@ -15,6 +15,7 @@ Tools-for-AutoCAD/
     ├── HIDE_SHOW/         ← Temporarily hide/show selected objects
     ├── MTEXT_TO_ATTR/     ← Convert MText to Attribute Definitions (ATTDEF)
     ├── LINK_TEXT/         ← Dynamically link numbers across sections
+    ├── TWO_WAY_SYNC/      ← True Two-Way Live Synchronizer for numbers
     └── ...                ← Future tools/extensions
 ```
 
@@ -77,6 +78,7 @@ Each toolset has its own README for detailed usage instructions:
 * 🔹 [Hide/Show Tools](./HIDE_SHOW/) – Temporarily hide or restore selected objects
 * 🔹 [MText to Attribute Tools](./MTEXT_TO_ATTR/) – Batch convert MText to Attributes (`MT2ATT`)
 * 🔹 [Link Text Tools](./LINK_TEXT/) – Dynamically link numbers across sections (`LINKBATCH`, `LINK1`, `COPYLINK`)
+* 🔹 [Two-Way Sync Tools](./TWO_WAY_SYNC/) – True Two-Way Live Synchronizer (`TWOWAYSYNC`, `TWOWAY1`, `SYNCALL`)
 
 > 🔗 Click any link above to view the full documentation and list of commands in that category.
 
