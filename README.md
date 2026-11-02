@@ -6,47 +6,48 @@
 
 ---
 
-## 💡 Toolset Overview
+## 🏗️ Repository Architecture
 
-| Category | Commands | Description | Folder |
-|---|---|---|---|
-| **Construction Lines** | `XVN`, `XHN`, `XH`, `XV`, `XA`, `XB`, `XO` | Extended XLINE tools. Includes **arraying multiple vertical/horizontal construction lines** with custom spacing and mouse-direction detection. | [`/LISP/XLINE/`](./LISP/XLINE/) |
-| **MText to Attribute** | `MT2ATT` | Batch-converts MText objects into Attribute Definitions (`ATTDEF`) in-place. Fully compatible with **Block Editor (`BEDIT`)**, preserves styles, layers, colors, and justifications. | [`/LISP/MTEXT_TO_ATTR/`](./LISP/MTEXT_TO_ATTR/) |
-| **Two-Way Live Sync** | `TWOWAYSYNC`, `TWOWAY1`, `SYNCALL`, `TWOWAYCLEAR` | **True Two-Way live synchronization** between matching numbers or tags across different sections (horizontal, vertical, diagonal). Edit either side $\rightarrow$ the other updates instantly. | [`/LISP/TWO_WAY_SYNC/`](./LISP/TWO_WAY_SYNC/) |
-| **Dynamic Fields Linker** | `LINKBATCH`, `LINK1`, `COPYLINK` | One-way dynamic linking across sections using native AutoCAD DWG Fields (`%<\AcObjProp ...>%`). | [`/LISP/LINK_TEXT/`](./LISP/LINK_TEXT/) |
-| **Selection Tools** | `SA`, `SR` | Fast selection and replacement of similar objects by layer, entity type, or block name. | [`/LISP/SELECTION/`](./LISP/SELECTION/) |
-| **Visibility Management**| `HH`, `HR` | Temporarily isolate/hide and restore visibility of selected drawing elements. | [`/LISP/HIDE_SHOW/`](./LISP/HIDE_SHOW/) |
-
----
-
-## 📁 Repository Structure
+Similar to professional BIM/Revit standards, tools are separated into **Published (Production)** and **Testing (Beta)** stages:
 
 ```
 Tools-for-AutoCAD/
-├── README.md                  ← Main repository documentation
+├── README.md
 └── LISP/
-    ├── README.md              ← Comprehensive LISP catalog & loading guide
-    ├── XLINE/                 ← Construction line shortcuts & multi-spacing arrays
-    │   ├── XLINE_ALL.lsp
-    │   └── README.md
-    ├── MTEXT_TO_ATTR/         ← Convert MText to Attributes (BEDIT compatible)
-    │   ├── MTEXT2ATTR.lsp
-    │   └── README.md
-    ├── TWO_WAY_SYNC/          ← Two-way live section tag synchronizer
-    │   ├── TWO_WAY_SYNC.lsp
-    │   └── README.md
-    ├── LINK_TEXT/             ← Dynamic Field-based text linkers
-    │   ├── LINK_TEXT.lsp
-    │   └── README.md
-    ├── SELECTION/             ← Selection helpers
-    │   ├── Selection.lsp
-    │   └── README.md
-    ├── HIDE_SHOW/             ← Hide/restore visibility tools
-    │   ├── HIDE_SHOW.LSP
-    │   └── README.md
-    └── Create Similar/        ← Create similar tools
-        └── CREATE SIMILAR.LSP
+    ├── README.md
+    │
+    ├── Published/                 ← Production-Ready Tools (Daily Drafting)
+    │   ├── XLINE/                 ← Multi-spaced construction lines (XVN, XHN, XH, XV, etc.)
+    │   ├── MTEXT_TO_ATTR/         ← In-place MText to ATTDEF conversion (BEDIT ready)
+    │   ├── SELECTION/             ← Fast object selection (SA, SR)
+    │   ├── HIDE_SHOW/             ← Element isolation & visibility tools (HH, HR)
+    │   └── Create Similar/        ← Quick creation of matching objects
+    │
+    └── Testing/                   ← Experimental / Active Development (Beta)
+        ├── TWO_WAY_SYNC/          ← True Two-Way live section tag synchronizer
+        └── LINK_TEXT/             ← Dynamic Field-based text linkers across sections
 ```
+
+---
+
+## 🟢 Published Tools (Production-Ready)
+
+| Toolset | Commands | Description | Folder |
+|---|---|---|---|
+| **Construction Lines** | `XVN`, `XHN`, `XH`, `XV`, `XA`, `XB`, `XO` | Extended XLINE tools. Includes **arraying multiple vertical/horizontal construction lines** with custom spacing and cursor-direction detection. | [`/Published/XLINE/`](./LISP/Published/XLINE/) |
+| **MText to Attribute** | `MT2ATT` | Batch-converts MText objects into Attribute Definitions (`ATTDEF`) in-place. Fully compatible with **Block Editor (`BEDIT`)**, preserves styles, layers, colors, and justifications. | [`/Published/MTEXT_TO_ATTR/`](./LISP/Published/MTEXT_TO_ATTR/) |
+| **Selection Tools** | `SA`, `SR` | Fast selection and replacement of similar objects by layer, entity type, or block name. | [`/Published/SELECTION/`](./LISP/Published/SELECTION/) |
+| **Visibility Management**| `HH`, `HR` | Temporarily isolate/hide and restore visibility of selected drawing elements. | [`/Published/HIDE_SHOW/`](./LISP/Published/HIDE_SHOW/) |
+| **Create Similar** | Property matching | Quickly spawn new entities matching existing element properties. | [`/Published/Create Similar/`](./LISP/Published/Create%20Similar/) |
+
+---
+
+## 🟡 Testing Tools (Experimental / Beta)
+
+| Toolset | Commands | Status | Description | Folder |
+|---|---|---|---|---|
+| **Two-Way Live Sync** | `TWOWAYSYNC`, `TWOWAY1`, `SYNCALL` | **Beta** | Live bidirectional synchronization between matching numbers/tags across sections using AutoLISP Object Reactors. | [`/Testing/TWO_WAY_SYNC/`](./LISP/Testing/TWO_WAY_SYNC/) |
+| **Dynamic Fields Linker** | `LINKBATCH`, `LINK1`, `COPYLINK` | **Beta** | One-way dynamic linking across sections using native AutoCAD DWG Fields (`%<\AcObjProp ...>%`). | [`/Testing/LINK_TEXT/`](./LISP/Testing/LINK_TEXT/) |
 
 ---
 
@@ -54,12 +55,11 @@ Tools-for-AutoCAD/
 
 ### Method 1: APPLOAD (Recommended)
 1. In AutoCAD, type `APPLOAD` and press **Enter**.
-2. Navigate to the desired `.lsp` file inside the `LISP/` subfolders.
+2. Navigate to the desired `.lsp` file inside the `LISP/Published/` subfolders.
 3. Click **Load**.
-4. *(Optional)* Add the script to your **Startup Suite** (click the Briefcase icon in APPLOAD) to auto-load every time AutoCAD starts.
+4. *(Optional)* Add the script to your **Startup Suite** (briefcase icon) to auto-load every time AutoCAD starts.
 
 ### Method 2: Command Line
-Type:
 ```lisp
 (load "path/to/script.lsp")
 ```
@@ -68,12 +68,11 @@ Type:
 
 ## 📝 Revision & Changelog
 
-### Version 2.1 (Current Revision)
-- **`XVN` & `XHN` Overhaul**: Fixed vertical construction line generation using native `_XLINE _V` mode. Added cursor-direction detection (left/right for vertical, up/down for horizontal) and spacing input via distance or snap points.
-- **`TWO_WAY_SYNC` Multi-Attribute Support**: Added intelligent tag detection for blocks with multiple attributes (e.g. `NUM`, `TAG`, `PREFIX`). Auto-detects number attributes or prompts for the exact attribute tag.
-- **`MTEXT2ATTR` In-Place Conversion**: Built custom block definition detection (`assoc 330`) so attribute conversion works seamlessly inside **Block Editor (`BEDIT`)** as well as Model and Paper Space. Automatically cleans invalid characters and names tags from text.
-- **`LINK_TEXT` Coordinate Fix**: Fixed batch point coordinate accessors (`lt:item-x`, `lt:item-y`) ensuring robust sorting across arbitrary screen coordinates.
-- **Cross-Platform Path Cleanup**: Cleaned up Windows folder naming conflicts and organized all scripts into dedicated, self-documenting directories.
+### Version 2.2
+- **Two-Tier Architecture**: Reorganized toolset into **`Published/`** (production-ready) and **`Testing/`** (beta/experimental) directories.
+- **Published Release of `XVN` & `XHN`**: Verified vertical/horizontal multi-line arrays with cursor direction input.
+- **Published Release of `MT2ATT`**: Verified in-place attribute creation working seamlessly inside Block Editor (`BEDIT`).
+- **Testing Migration**: Relocated `TWO_WAY_SYNC` and `LINK_TEXT` into `Testing/` for continued field refinement on complex multi-attribute blocks.
 
 ---
 
