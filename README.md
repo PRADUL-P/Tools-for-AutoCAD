@@ -9,6 +9,7 @@
 - 🫥 Temporary hide and restore visibility of elements (`HH`, `HR`)
 - 📐 Extended XLINE tools with smarter drawing logic (`XH`, `XV`, `XVN`, etc.)
 - 🏷️ Convert MText objects to Attribute Definitions in-place (`MT2ATT`), fully compatible with Block Editor (`BEDIT`)
+- 🔗 Dynamic Text & Attribute Linker (`LINKBATCH`, `LINK1`, `COPYLINK`) to link numbers across different sections (horizontal, vertical, diagonal)
 - 🔁 Custom routines to automate and simplify repetitive drafting tasks
 
 ## 🔍 Why Use This Repo?

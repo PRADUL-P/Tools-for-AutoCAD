@@ -14,6 +14,7 @@ Tools-for-AutoCAD/
     ├── XLINE/             ← Create multiple xlines, custom angles
     ├── HIDE_SHOW/         ← Temporarily hide/show selected objects
     ├── MTEXT_TO_ATTR/     ← Convert MText to Attribute Definitions (ATTDEF)
+    ├── LINK_TEXT/         ← Dynamically link numbers across sections
     └── ...                ← Future tools/extensions
 ```
 
@@ -75,6 +76,7 @@ Each toolset has its own README for detailed usage instructions:
 * 🔹 [XLine Tools](./XLINE/) – Create xlines at various angles, positions, and spacings
 * 🔹 [Hide/Show Tools](./HIDE_SHOW/) – Temporarily hide or restore selected objects
 * 🔹 [MText to Attribute Tools](./MTEXT_TO_ATTR/) – Batch convert MText to Attributes (`MT2ATT`)
+* 🔹 [Link Text Tools](./LINK_TEXT/) – Dynamically link numbers across sections (`LINKBATCH`, `LINK1`, `COPYLINK`)
 
 > 🔗 Click any link above to view the full documentation and list of commands in that category.
 
