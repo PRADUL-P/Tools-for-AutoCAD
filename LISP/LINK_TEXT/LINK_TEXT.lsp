@@ -22,8 +22,37 @@
   )
 )
 
-;; Helper: Extract target Text/MText/Attribute VLA-Object and its position
-(defun lt:get-text-vla-and-pt (ent / data typ vla-obj atts)
+;; Helper: Extract specific attribute from block
+(defun lt:get-att-by-tag (blkObj targetTag / atts found)
+  (if (and (= (vla-get-ObjectName blkObj) "AcDbBlockReference")
+           (= (vla-get-HasAttributes blkObj) :vlax-true))
+    (progn
+      (setq atts (vlax-invoke blkObj 'GetAttributes))
+      (cond
+        ((and targetTag (/= targetTag ""))
+         (foreach a atts
+           (if (= (strcase (vla-get-TagString a)) (strcase targetTag))
+             (setq found a)
+           )
+         )
+        )
+        ((= (length atts) 1) (setq found (car atts)))
+        (t
+         (foreach a atts
+           (if (and (null found) (wcmatch (vl-string-trim " " (vla-get-TextString a)) "*#*"))
+             (setq found a)
+           )
+         )
+         (if (null found) (setq found (car atts)))
+        )
+      )
+      found
+    )
+    nil
+  )
+)
+
+(defun lt:get-text-vla-and-pt (ent targetTag / data typ vla-obj att)
   (setq data (entget ent))
   (setq typ  (cdr (assoc 0 data)))
   (setq vla-obj (vlax-ename->vla-object ent))
@@ -31,11 +60,11 @@
     ((member typ '("TEXT" "MTEXT" "ATTRIB"))
      (list (cdr (assoc 10 data)) vla-obj)
     )
-    ((and (= typ "INSERT") (= (vla-get-HasAttributes vla-obj) :vlax-true))
-     (setq atts (vlax-invoke vla-obj 'GetAttributes))
-     (if (and atts (> (length atts) 0))
-       (list (vlax-safearray->list (vlax-variant-value (vla-get-InsertionPoint (car atts))))
-             (car atts)
+    ((= typ "INSERT")
+     (setq att (lt:get-att-by-tag vla-obj targetTag))
+     (if att
+       (list (vlax-safearray->list (vlax-variant-value (vla-get-InsertionPoint vla-obj)))
+             att
        )
        nil
      )
@@ -61,9 +90,7 @@
       (setq spanY (abs (- maxY minY)))
 
       (if (>= spanX spanY)
-        ;; Primarily Horizontal -> Sort Left-to-Right (X ascending)
         (vl-sort item-list '(lambda (a b) (< (lt:item-x a) (lt:item-x b))))
-        ;; Primarily Vertical -> Sort Top-to-Bottom (Y descending)
         (vl-sort item-list '(lambda (a b) (> (lt:item-y a) (lt:item-y b))))
       )
     )
@@ -74,7 +101,8 @@
 ;; COMMAND 1: LINKBATCH (Batch-Link two series of tags)
 ;; =============================================================================
 (defun c:LINKBATCH ( / acadObj doc ssSrc ssTgt srcList tgtList
-                       i ent pair count minCount srcObj tgtObj srcId fieldStr )
+                       i ent pair count minCount srcObj tgtObj srcId fieldStr
+                       sampleBlk atts detectedTags userTag tagPrompt )
   (setq acadObj (vlax-get-acad-object))
   (setq doc     (vla-get-ActiveDocument acadObj))
 
@@ -82,21 +110,45 @@
   (princ "\n LINKBATCH: Batch-Link Numbers Across Sections")
   (princ "\n=======================================================")
 
-  (princ "\nSelect SOURCE numbers (e.g. horizontal section 1 to 11): ")
+  (princ "\nSelect SOURCE numbers (Horizontal): ")
   (setq ssSrc (ssget '((-4 . "<OR") (0 . "TEXT") (0 . "MTEXT") (0 . "INSERT") (0 . "ATTRIB") (-4 . "OR>"))))
 
   (if (not ssSrc)
     (princ "\nNo source objects selected. Exiting.")
     (progn
+      ;; Check if blocks have multiple attributes
+      (setq userTag nil sampleBlk nil i 0)
+      (while (< i (sslength ssSrc))
+        (setq ent (ssname ssSrc i))
+        (if (and (null sampleBlk) (= (cdr (assoc 0 (entget ent))) "INSERT"))
+          (setq sampleBlk (vlax-ename->vla-object ent))
+        )
+        (setq i (1+ i))
+      )
+
+      (if (and sampleBlk (= (vla-get-HasAttributes sampleBlk) :vlax-true))
+        (progn
+          (setq atts (vlax-invoke sampleBlk 'GetAttributes))
+          (if (> (length atts) 1)
+            (progn
+              (setq detectedTags (mapcar 'vla-get-TagString atts))
+              (princ (strcat "\nDetected Tags in Block: [" (apply 'strcat (mapcar '(lambda (x) (strcat x " ")) detectedTags)) "]"))
+              (setq tagPrompt (strcase (getstring "\nEnter Attribute Tag to link (or press Enter for auto-number detect): ")))
+              (if (/= tagPrompt "") (setq userTag tagPrompt))
+            )
+          )
+        )
+      )
+
       (setq srcList '() i 0)
       (while (< i (sslength ssSrc))
         (setq ent (ssname ssSrc i))
-        (setq pair (lt:get-text-vla-and-pt ent))
+        (setq pair (lt:get-text-vla-and-pt ent userTag))
         (if pair (setq srcList (cons pair srcList)))
         (setq i (1+ i))
       )
 
-      (princ "\nSelect TARGET numbers to link (e.g. vertical section 1 to 11): ")
+      (princ "\nSelect TARGET numbers to link (Vertical): ")
       (setq ssTgt (ssget '((-4 . "<OR") (0 . "TEXT") (0 . "MTEXT") (0 . "INSERT") (0 . "ATTRIB") (-4 . "OR>"))))
 
       (if (not ssTgt)
@@ -105,7 +157,7 @@
           (setq tgtList '() i 0)
           (while (< i (sslength ssTgt))
             (setq ent (ssname ssTgt i))
-            (setq pair (lt:get-text-vla-and-pt ent))
+            (setq pair (lt:get-text-vla-and-pt ent userTag))
             (if pair (setq tgtList (cons pair tgtList)))
             (setq i (1+ i))
           )
@@ -134,7 +186,6 @@
 
           (vla-Regen doc acAllViewports)
           (princ (strcat "\nSuccessfully linked " (itoa count) " item(s)!"))
-          (princ "\nWhenever you edit any source text, run REGEN to update the linked section.")
         )
       )
     )
@@ -143,7 +194,7 @@
 )
 
 ;; =============================================================================
-;; COMMAND 2: LINK1 (Link one-by-one by clicking)
+;; COMMAND 2: LINK1 (Link one-by-one by clicking directly on the attribute)
 ;; =============================================================================
 (defun c:LINK1 ( / acadObj doc nPickSrc srcEnt srcData srcTyp srcVla srcId
                    nPickTgt tgtEnt tgtData tgtTyp tgtVla fieldStr loop )
@@ -152,11 +203,11 @@
   (setq loop t)
 
   (princ "\n=======================================================")
-  (princ "\n LINK1: Single Text/Attribute Linker (Press ESC to stop)")
+  (princ "\n LINK1: Click directly on the specific attribute to link")
   (princ "\n=======================================================")
 
   (while loop
-    (setq nPickSrc (nentsel "\nSelect SOURCE text/attribute (or press Enter to exit): "))
+    (setq nPickSrc (nentsel "\nClick SOURCE attribute/text (or press Enter to exit): "))
     (if (not nPickSrc)
       (setq loop nil)
       (progn
@@ -169,7 +220,7 @@
             (setq srcVla (vlax-ename->vla-object srcEnt))
             (setq srcId  (lt:get-obj-id-str srcVla doc))
 
-            (setq nPickTgt (nentsel "\nSelect TARGET text/attribute to receive link: "))
+            (setq nPickTgt (nentsel "\nClick TARGET attribute/text to receive link: "))
             (if nPickTgt
               (progn
                 (setq tgtEnt  (car nPickTgt))
@@ -196,60 +247,6 @@
     )
   )
   (princ "\nExited LINK1.")
-  (princ)
-)
-
-;; =============================================================================
-;; COMMAND 3: COPYLINK
-;; =============================================================================
-(defun c:COPYLINK ( / acadObj doc ent obj srcId basePt destPt cloneObj fieldStr srcAtt tgtAtt )
-  (setq acadObj (vlax-get-acad-object))
-  (setq doc     (vla-get-ActiveDocument acadObj))
-
-  (setq ent (car (entsel "\nSelect text, MText, or block with attribute to copy-link: ")))
-  (if (not ent)
-    (princ "\nNothing selected.")
-    (progn
-      (setq obj (vlax-ename->vla-object ent))
-      (setq basePt (getpoint "\nSpecify base point: "))
-      (if basePt
-        (progn
-          (setq destPt (getpoint basePt "\nSpecify destination point on other section: "))
-          (if destPt
-            (progn
-              (vla-StartUndoMark doc)
-              (setq cloneObj (vla-Copy obj))
-              (vla-Move cloneObj (vlax-3d-point basePt) (vlax-3d-point destPt))
-              (cond
-                ((and (= (vla-get-ObjectName cloneObj) "AcDbBlockReference")
-                      (= (vla-get-HasAttributes cloneObj) :vlax-true))
-                 (setq srcAtt (car (vlax-invoke obj 'GetAttributes)))
-                 (setq tgtAtt (car (vlax-invoke cloneObj 'GetAttributes)))
-                 (if (and srcAtt tgtAtt)
-                   (progn
-                     (setq srcId (lt:get-obj-id-str srcAtt doc))
-                     (setq fieldStr (strcat "%<\\AcObjProp Object(%<\\_ObjId " srcId ">%).TextString>%"))
-                     (vla-put-TextString tgtAtt fieldStr)
-                     (vla-Update tgtAtt)
-                   )
-                 )
-                )
-                ((member (vla-get-ObjectName cloneObj) '("AcDbText" "AcDbMText"))
-                 (setq srcId (lt:get-obj-id-str obj doc))
-                 (setq fieldStr (strcat "%<\\AcObjProp Object(%<\\_ObjId " srcId ">%).TextString>%"))
-                 (vla-put-TextString cloneObj fieldStr)
-                 (vla-Update cloneObj)
-                )
-              )
-              (vla-EndUndoMark doc)
-              (vla-Regen doc acActiveViewport)
-              (princ "\nCopied and dynamically linked!")
-            )
-          )
-        )
-      )
-    )
-  )
   (princ)
 )
 
