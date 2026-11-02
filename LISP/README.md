@@ -15,6 +15,7 @@ LISP/
 ├── Published/                 ← Production-ready tools
 │   ├── README.md
 │   ├── XLINE/                 ← Multi-spaced construction lines & shortcuts
+│   ├── TCOUNT_PLUS/           ← Advanced directional renumbering tool (LR, RL, TB, BT)
 │   ├── MTEXT_TO_ATTR/         ← Convert MText to Attributes (BEDIT compatible)
 │   ├── SELECTION/             ← Selection helpers
 │   ├── HIDE_SHOW/             ← Hide/restore visibility tools
