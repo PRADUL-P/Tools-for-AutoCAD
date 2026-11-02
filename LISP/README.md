@@ -1,94 +1,44 @@
-# 🛠️ AutoCAD LISP Tools
+# 🛠️ AutoCAD LISP Tools Catalog
 
-Welcome to the **Tools-for-AutoCAD** repository! This folder contains a collection of powerful and practical AutoLISP utilities designed to improve your productivity and simplify repetitive tasks in AutoCAD.
-
----
-
-## 📁 Folder Structure
-
-```
-Tools-for-AutoCAD/
-└── LISP/
-    ├── README.md  ← You are here
-    ├── SELECTION/         ← Select similar, by layer, color, block, etc.
-    ├── XLINE/             ← Create multiple xlines, custom angles
-    ├── HIDE_SHOW/         ← Temporarily hide/show selected objects
-    ├── MTEXT_TO_ATTR/     ← Convert MText to Attribute Definitions (ATTDEF)
-    ├── LINK_TEXT/         ← Dynamically link numbers across sections
-    ├── TWO_WAY_SYNC/      ← True Two-Way Live Synchronizer for numbers
-    └── ...                ← Future tools/extensions
-```
+Welcome to the **Tools-for-AutoCAD** LISP catalog! This directory contains specialized AutoLISP utilities designed to automate drafting, improve precision, and eliminate repetitive tasks in AutoCAD.
 
 ---
 
-## 🔍 About This Repository
+## 📂 Tool Directories & Documentation
 
-This repository is created to provide a centralized place for handy LISP routines that:
+Each toolset is placed in its own dedicated folder with standalone documentation:
 
-* Automate common CAD workflows
-* Help in faster object selection
-* Improve drawing clarity
-* Aid in repetitive design/drafting tasks
-
-These tools are created by a practicing Civil Engineer for engineers, drafters, and CAD professionals.
-
----
-
-## ✨ Advantages of Using AutoLISP Tools
-
-✅ **Boost Efficiency**: Reduce repetitive manual selections and actions
-✅ **Customization**: Easily editable and adaptable to your workflow
-✅ **Simplicity**: Lightweight and written in clear, documented LISP
-✅ **Compatibility**: Works with AutoCAD 2016 and above
-✅ **Open-source**: Extend, fork, or contribute back
+| Folder | Core Commands | Documentation | Description |
+|---|---|---|---|
+| **[`/XLINE/`](./XLINE/)** | `XVN`, `XHN`, `XH`, `XV`, `XA`, `XB`, `XO` | [Read Docs](./XLINE/README.md) | Multi-spaced construction lines with mouse-direction detection and fast shortcuts. |
+| **[`/MTEXT_TO_ATTR/`](./MTEXT_TO_ATTR/)** | `MT2ATT` | [Read Docs](./MTEXT_TO_ATTR/README.md) | In-place conversion of MText to Attribute Definitions (`ATTDEF`), Block Editor (`BEDIT`) ready. |
+| **[`/TWO_WAY_SYNC/`](./TWO_WAY_SYNC/)** | `TWOWAYSYNC`, `TWOWAY1`, `SYNCALL` | [Read Docs](./TWO_WAY_SYNC/README.md) | True Two-Way live synchronization for section numbers across different views/shapes. |
+| **[`/LINK_TEXT/`](./LINK_TEXT/)** | `LINKBATCH`, `LINK1`, `COPYLINK` | [Read Docs](./LINK_TEXT/README.md) | Native AutoCAD Field-based dynamic linking between sections. |
+| **[`/SELECTION/`](./SELECTION/)** | `SA`, `SR` | [Read Docs](./SELECTION/README.md) | Selection filters by layer, entity type, and block definition. |
+| **[`/HIDE_SHOW/`](./HIDE_SHOW/)** | `HH`, `HR` | [Read Docs](./HIDE_SHOW/README.md) | Temporary isolation and visibility restoration of drawing objects. |
 
 ---
 
-## 🚀 How to Load a LISP File in AutoCAD
+## 🚀 How to Load Scripts in AutoCAD
 
-1. Launch AutoCAD
-2. Type `APPLOAD` in the command bar and press `Enter`
-3. Browse to the `.lsp` file inside the `/LISP/` subfolders
-4. Click **Load**
-5. Use the defined command (e.g., `SA`, `HH`, `XL`, etc.) in the command bar
+1. Launch AutoCAD.
+2. Type `APPLOAD` in the command bar and press `Enter`.
+3. Browse to the `.lsp` file inside the corresponding subfolder.
+4. Click **Load**.
+5. Type the command name (e.g. `XVN`, `MT2ATT`, `TWOWAYSYNC`, etc.) in the command prompt.
 
-### Optional (Auto-Load at Startup):
-
-* In the APPLOAD dialog, click **Contents** under Startup Suite
-* Add your `.lsp` files here to load them automatically each time AutoCAD starts
-
----
-
-## ❗ Common Issues & Fixes
-
-| Problem                  | Cause                           | Solution                                |
-| ------------------------ | ------------------------------- | --------------------------------------- |
-| `Unknown command`        | LISP file not loaded            | Use `APPLOAD` before typing the command |
-| `No function definition` | Syntax error or incomplete load | Reload or review the LISP file          |
-| `Nothing selected`       | Empty or invalid selection      | Ensure you're selecting valid objects   |
+### Auto-Load on Startup:
+To have your favorite tools available in every drawing automatically:
+1. Type `APPLOAD`.
+2. Under **Startup Suite**, click the **Contents** button (briefcase icon).
+3. Click **Add...** and choose your `.lsp` files.
 
 ---
 
-## 📂 Explore Specific Tools
+## 📌 Troubleshooting Quick Guide
 
-Each toolset has its own README for detailed usage instructions:
-
-* 🔹 [Selection Tools](./SELECTION/) – Select objects by type, color, layer, etc.
-* 🔹 [XLine Tools](./XLINE/) – Create xlines at various angles, positions, and spacings
-* 🔹 [Hide/Show Tools](./HIDE_SHOW/) – Temporarily hide or restore selected objects
-* 🔹 [MText to Attribute Tools](./MTEXT_TO_ATTR/) – Batch convert MText to Attributes (`MT2ATT`)
-* 🔹 [Link Text Tools](./LINK_TEXT/) – Dynamically link numbers across sections (`LINKBATCH`, `LINK1`, `COPYLINK`)
-* 🔹 [Two-Way Sync Tools](./TWO_WAY_SYNC/) – True Two-Way Live Synchronizer (`TWOWAYSYNC`, `TWOWAY1`, `SYNCALL`)
-
-> 🔗 Click any link above to view the full documentation and list of commands in that category.
-
-
-
-
-## 🤝 Contributions
-
-Feel free to fork, use, and contribute! Bug fixes, new tools, and improvements are welcome.
-
----
-
-Happy Drafting! ✍️
+| Issue | Cause | Solution |
+|---|---|---|
+| `Unknown command "XYZ"` | The script has not been loaded in the current AutoCAD session. | Run `APPLOAD` and load the `.lsp` file first. |
+| `Bad DXF group` | Attempting to pass non-primitive types to DXF functions. | All tools in this repo have been hardened with type-safe fallbacks. Ensure you are running the latest revision. |
+| `Object is open for write` | Reactor attempted to write during an active transaction. | `TWO_WAY_SYNC` uses a deferred command-ended queue to prevent write-lock collisions. |
