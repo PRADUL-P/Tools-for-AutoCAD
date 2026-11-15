@@ -38,7 +38,7 @@ Tools-for-AutoCAD/
 |---|---|---|---|
 | **Construction Lines** | `XVN`, `XHN`, `XH`, `XV`, `XA`, `XB`, `XO` | Extended XLINE tools. Includes **arraying multiple vertical/horizontal construction lines** with custom spacing and cursor-direction detection. | [`/Published/XLINE/`](./LISP/Published/XLINE/) |
 | **Directional Renumbering** | `TC`, `TCOUNTPLUS` | Enhanced replacement for Express Tool `TCOUNT`. Renumber text/attributes in **any direction** (`LR`, `RL`, `TB`, `BT`, `SEL`), with simultaneous prefix, suffix, and leading zero padding. | [`/Published/TCOUNT_PLUS/`](./LISP/Published/TCOUNT_PLUS/) |
-| **Attribute Synchronizer** | `ATTFIX`, `AF`, `ATTFIXALL`, `AFA` | Unifies **Value, Tag, and Prompt** in one step. Automatically syncs Block Definitions and instances without running destructive `ATTSYNC`. | [`/Published/ATTFIX/`](./LISP/Published/ATTFIX/) |
+| **Attribute Synchronizer** | `ATTFIX`, `AF` | Instantly updates **Tag and Prompt** based on **Value** for all selected blocks (supports pre- and post-selection). | [`/Published/ATTFIX/`](./LISP/Published/ATTFIX/) |
 | **MText to Attribute** | `MT2ATT` | Batch-converts MText objects into Attribute Definitions (`ATTDEF`) in-place. Fully compatible with **Block Editor (`BEDIT`)**, preserves styles, layers, colors, and justifications. | [`/Published/MTEXT_TO_ATTR/`](./LISP/Published/MTEXT_TO_ATTR/) |
 | **Selection Tools** | `SA`, `SR` | Fast selection and replacement of similar objects by layer, entity type, or block name. | [`/Published/SELECTION/`](./LISP/Published/SELECTION/) |
 | **Visibility Management**| `HH`, `HR` | Temporarily isolate/hide and restore visibility of selected drawing elements. | [`/Published/HIDE_SHOW/`](./LISP/Published/HIDE_SHOW/) |

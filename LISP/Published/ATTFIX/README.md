@@ -1,64 +1,44 @@
-# 🏷️ ATTFIX – Instant Attribute Tag & Prompt Synchronizer
+# 🏷️ ATTFIX – Batch Attribute Tag & Prompt Synchronizer
 
-A productivity AutoLISP tool for AutoCAD that eliminates the repetitive chore of editing block attributes.
+Instantly updates block attribute **TAGs** and **PROMPTs** based on their current **VALUE** "as it is"!
 
-Whenever you run `ATTFIX` and click an attribute, **the Tag and Prompt instantly change to match that attribute's current Value as it is**—no manual re-typing, no dialog boxes, in **one single click**!
-
----
-
-## ⚡ How It Works (1-Click Sync)
-
-In AutoCAD:
-- You have blocks where attributes already have values (e.g. `101`, `DOOR-A`, `Kitchen`, `PL-01`).
-- You run **`AF`** (or `ATTFIX`).
-- **Just click the attribute.**
-- **BAM!** The **Tag** and **Prompt** immediately change to that value **as it is**!
-- You can keep clicking attribute after attribute continuously. Press **Enter** or **Esc** when finished.
+Supports selection **BEFORE or AFTER** entering the command (batch window-select, crossing, pick, or `ALL`).
 
 ---
 
-## 🛠️ What Gets Updated Behind the Scenes
+## ⚡ How It Works
 
-1. **Current Attribute Reference (`ATTRIB`)**:
-   - `TagString` $\rightarrow$ set to the Value **as it is**.
-2. **Block Definition (`AcDbBlockTableRecord` / `ATTDEF`)**:
-   - `TagString` $\rightarrow$ set to the Value **as it is**.
-   - `PromptString` $\rightarrow$ set to the Value **as it is**.
-   - `TextString` (default) $\rightarrow$ set to the Value **as it is**.
-3. **All Existing Block Instances in the Drawing**:
-   - Their `TagString` is updated to match the definition so the entire drawing stays clean and consistent **without running destructive `ATTSYNC`**!
+### Option 1: Selection BEFORE Command (Pre-selection / Pickfirst)
+1. Select blocks or attributes in AutoCAD (window-select, crossing, or `Ctrl+A`).
+2. Type **`AF`** (or `ATTFIX`) and press **Enter** / **Spacebar**.
+3. **Instantly:** All selected attributes have their **Tag** and **Prompt** changed to match their **Value as it is**!
 
----
-
-## 🚀 Commands & Modes
-
-| Command | Alias | Mode | Description |
-|---|---|---|---|
-| `ATTFIX` | **`AF`** | **1-Click Sync** *(Default)* | **Click any attribute $\rightarrow$ Tag and Prompt instantly change to that Value as it is!** Continuous loop. |
-| `ATTFIXEDIT` | **`AFE`** | **Edit Mode** | Pick an attribute, type a new value $\rightarrow$ Value, Tag, and Prompt all change to that new value as it is. |
-| `ATTFIXALL` | **`AFA`** | **Global Mode** | Click an attribute $\rightarrow$ Tag and Prompt change to that Value as it is, **AND updates that Value across ALL instances** of that block in the drawing. |
-
-> 💡 **Quick Switch inside the Command**: While `AF` is running, you can type **`E`** (Edit), **`G`** (Global), or **`S`** (Sync) directly at the selection prompt to switch modes on the fly!
+### Option 2: Selection AFTER Command
+1. Type **`AF`** (or `ATTFIX`) and press **Enter**.
+2. Select your blocks or attributes (use window, crossing, click, or type `ALL`).
+3. Press **Enter**.
+4. **Instantly:** All selected attributes have their **Tag** and **Prompt** changed to match their **Value as it is**!
 
 ---
 
-## 💻 How to Load & Run in AutoCAD
+## 🛠️ What Gets Updated
+- **Attribute Reference (`ATTRIB`)**: Tag is set to the attribute's current Value.
+- **Block Table Definition (`ATTDEF`)**: The underlying block definition's Tag and Prompt are updated in the Block Table.
+- **Block Editor (`BEDIT`)**: Also works directly on `ATTDEF` objects inside the Block Editor.
+- **No Destructive `ATTSYNC`**: Preserves custom attribute positions, rotations, and manual adjustments.
+- **Single Undo**: One `Ctrl+Z` reverses the entire batch operation cleanly.
 
-1. In AutoCAD, load the script:
-   ```lisp
-   (load "E:/AUTOCAD/Tools-for-AutoCAD/LISP/Published/ATTFIX/ATTFIX.lsp")
-   ```
-   *(or use `APPLOAD` and pick `ATTFIX.lsp`)*
+---
 
-2. Type **`AF`** and press **Enter**.
-3. Click the attribute.
-4. Output:
-   ```text
-   ✅ SUCCESS for Block [DOOR_TAG]:
-      • Value  : "101"
-      • Tag    : "101" (changed to Value as it is)
-      • Prompt : "101" (changed to Value as it is)
-      • Block Definition: ATTDEF Tag & Prompt updated in Block Table.
-      • Tag Sync: 4 instance(s) synced to Tag "101".
-   ```
-5. Click the next attribute, or press **Enter** to finish!
+## 🚀 Commands
+
+| Command | Shortcut | Description |
+|---|---|---|
+| `ATTFIX` | **`AF`** | Instantly syncs Tag and Prompt to Value for all selected blocks/attributes (pre-selection or post-selection). |
+
+---
+
+## 💻 Load in AutoCAD
+```lisp
+(load "E:/AUTOCAD/Tools-for-AutoCAD/LISP/Published/ATTFIX/ATTFIX.lsp")
+```
