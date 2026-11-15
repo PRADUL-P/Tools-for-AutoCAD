@@ -1,81 +1,46 @@
 ;;; =========================================================================
-;;; ATTFIX.lsp - Attribute Synchronizer & Tag/Prompt/Value Unifier for AutoCAD
+;;; ATTFIX.lsp - Instant Attribute Tag & Prompt Synchronizer for AutoCAD
 ;;; =========================================================================
 ;;; 
 ;;; DESCRIPTION:
-;;;   When modifying block attributes, AutoCAD typically requires manually
-;;;   updating the Value, Tag, and Prompt separately (or diving into BEDIT
-;;;   and dealing with destructive ATTSYNC resets).
+;;;   Click any block attribute, and ATTFIX instantly changes its TAG and
+;;;   PROMPT to match that attribute's VALUE exactly "as it is"!
 ;;;
-;;;   ATTFIX solves this in one single step:
-;;;   Pick any attribute, enter the new name/value, and ATTFIX automatically
-;;;   updates ALL THREE components to that name:
-;;;     1. Attribute Value   (TextString)  -> Updated to new name
-;;;     2. Attribute Tag     (TagString)   -> Updated to new name (sanitized)
-;;;     3. Attribute Prompt  (PromptString)-> Updated to new name in Block Def
+;;;   What it does in 1 click:
+;;;     1. Reads the selected attribute's current Value (e.g., "101" or "DOOR_A").
+;;;     2. Sets Attribute Tag   (TagString)   -> to that Value as it is.
+;;;     3. Sets Attribute Prompt (PromptString)-> to that Value as it is.
+;;;     4. Synchronizes the parent Block Definition (ATTDEF in Block Table Record).
+;;;     5. Synchronizes Tags across all existing block instances in the drawing.
 ;;;
 ;;;   Works on:
-;;;     - Inserted Block References (Model Space & Paper Space / Layouts)
-;;;     - Dynamic Blocks (*U anonymous block table records handled correctly)
-;;;     - Attribute Definitions directly inside the BLOCK EDITOR (BEDIT)
-;;;     - Preserves all custom attribute positions, rotations & formatting
+;;;     - Block References in Model Space and Paper Space / Layouts.
+;;;     - Dynamic Blocks (correctly resolves *U anonymous blocks to EffectiveName).
+;;;     - Attribute Definitions (ATTDEF) directly inside BLOCK EDITOR (BEDIT).
+;;;     - Preserves all custom attribute positions, rotations, and formatting
 ;;;       WITHOUT running destructive ATTSYNC!
 ;;;
 ;;; COMMANDS:
-;;;   ATTFIX    - Main command: Updates Value, Tag, & Prompt for selected attribute,
-;;;               syncs Block Definition, and syncs Tags on all existing instances.
-;;;   AF        - Fast keyboard shortcut for ATTFIX.
-;;;   ATTFIXALL - Global mode: Same as ATTFIX, but ALSO updates the Value across
-;;;               ALL instances of that block throughout the drawing.
-;;;   AFA       - Fast keyboard shortcut for ATTFIXALL.
+;;;   ATTFIX    / AF  : 1-Click Sync Mode. Click any attribute to instantly change
+;;;                     its Tag and Prompt to its Value as it is. Continuous loop!
+;;;   ATTFIXEDIT/ AFE : Edit Mode. Pick attribute, type a new value, and Value,
+;;;                     Tag, and Prompt all change to that new value as it is.
+;;;   ATTFIXALL / AFA : Global Mode. Click attribute to sync Tag & Prompt to Value,
+;;;                     AND updates that Value across ALL instances of that block.
 ;;;
 ;;; =========================================================================
 
 (vl-load-com)
 
 ;;; -------------------------------------------------------------------------
-;;; HELPER: Sanitize string into a valid AutoCAD Attribute Tag
-;;; (Replaces spaces/invalid symbols with underscores, converts to uppercase)
+;;; HELPER: Safe Tag Assignment
+;;; Sets TagString directly "as it is". If AutoCAD rejects spaces in TagString,
+;;; gracefully falls back to replacing spaces with underscores.
 ;;; -------------------------------------------------------------------------
-(defun attfix:to-tag (str / res i ch cleanStr)
-  (if (or (null str) (= str ""))
-    "TAG"
-    (progn
-      (setq cleanStr (strcase (vl-string-trim " \t\r\n" str)))
-      (setq res "")
-      (setq i 1)
-      (while (<= i (strlen cleanStr))
-        (setq ch (substr cleanStr i 1))
-        (cond
-          ;; Space or tab -> underscore
-          ((or (= ch " ") (= ch "\t"))
-           (if (and (/= res "") (/= (substr res (strlen res) 1) "_"))
-             (setq res (strcat res "_"))
-           )
-          )
-          ;; Allowed characters: A-Z, 0-9, _, -, .
-          ((or (and (>= ch "A") (<= ch "Z"))
-               (and (>= ch "0") (<= ch "9"))
-               (= ch "_")
-               (= ch "-")
-               (= ch "."))
-           (setq res (strcat res ch))
-          )
-          ;; Any other punctuation or symbol -> underscore
-          (t
-           (if (and (/= res "") (/= (substr res (strlen res) 1) "_"))
-             (setq res (strcat res "_"))
-           )
-          )
-        )
-        (setq i (1+ i))
-      )
-      ;; Strip trailing underscores
-      (while (and (> (strlen res) 0) (= (substr res (strlen res) 1) "_"))
-        (setq res (substr res 1 (1- (strlen res))))
-      )
-      (if (= res "") "TAG" res)
-    )
+(defun attfix:set-tag-safe (obj newTag / err)
+  (setq err (vl-catch-all-apply 'vla-put-TagString (list obj newTag)))
+  (if (vl-catch-all-error-p err)
+    (vl-catch-all-apply 'vla-put-TagString (list obj (vl-string-translate " " "_" newTag)))
   )
 )
 
@@ -95,7 +60,7 @@
 ;;; -------------------------------------------------------------------------
 ;;; HELPER: Update Attribute Definition (ATTDEF) inside Block Table Record
 ;;; -------------------------------------------------------------------------
-(defun attfix:update-block-def (doc blkName oldTag newTag newPrompt newVal / blks blkDef count)
+(defun attfix:update-block-def (doc blkName oldTag newVal / blks blkDef count)
   (setq count 0)
   (setq blks (vla-get-Blocks doc))
   (vl-catch-all-apply
@@ -105,9 +70,9 @@
          (if (and (= (vla-get-ObjectName subObj) "AcDbAttributeDefinition")
                   (= (strcase (vla-get-TagString subObj)) (strcase oldTag)))
            (progn
-             (vla-put-TagString subObj newTag)
-             (vla-put-PromptString subObj newPrompt)
-             (vla-put-TextString subObj newVal)
+             (attfix:set-tag-safe subObj newVal)
+             (vl-catch-all-apply 'vla-put-PromptString (list subObj newVal))
+             (vl-catch-all-apply 'vla-put-TextString (list subObj newVal))
              (setq count (1+ count))
            )
          )
@@ -122,7 +87,7 @@
 ;;; Always updates TagString to maintain consistency with definition.
 ;;; If updateValueP is T, also updates TextString (Value).
 ;;; -------------------------------------------------------------------------
-(defun attfix:sync-instances (doc blkName oldTag newTag newVal updateValueP / ss i ent bObj atts count)
+(defun attfix:sync-instances (doc blkName oldTag newVal updateValueP / ss i ent bObj atts count)
   (setq count 0)
   (setq ss (ssget "_X" (list '(0 . "INSERT"))))
   (if ss
@@ -139,9 +104,9 @@
             (foreach att atts
               (if (= (strcase (vla-get-TagString att)) (strcase oldTag))
                 (progn
-                  (vla-put-TagString att newTag)
+                  (attfix:set-tag-safe att newVal)
                   (if updateValueP
-                    (vla-put-TextString att newVal)
+                    (vl-catch-all-apply 'vla-put-TextString (list att newVal))
                   )
                   (vla-Update att)
                   (setq count (1+ count))
@@ -158,11 +123,12 @@
 )
 
 ;;; -------------------------------------------------------------------------
-;;; CORE FUNCTION: attfix:execute
+;;; CORE ENGINE: attfix:run
 ;;; -------------------------------------------------------------------------
-(defun attfix:execute (globalValueUpdate / acadObj doc oldEcho oldErr entPair ent entData entType
-                                          attObj oldTag oldVal oldPrompt newName newTag newPrompt
-                                          parentList parentEname blkRef blkName defCount instCount)
+(defun attfix:run (initialMode / acadObj doc oldEcho oldErr activeMode entPair ent
+                                  entData entType attObj oldVal oldTag oldPrompt
+                                  targetVal parentList parentEname blkRef blkName
+                                  defCount instCount)
   (setq acadObj (vlax-get-acad-object))
   (setq doc (vla-get-ActiveDocument acadObj))
   (setq oldEcho (getvar "CMDECHO"))
@@ -183,124 +149,174 @@
     (princ)
   )
 
-  (princ (strcat "\n" (if globalValueUpdate "🌐 [ATTFIXALL: Global Mode]" "⚡ [ATTFIX: Single Mode]")
-                 " - Value, Tag & Prompt Synchronizer."))
-  (princ "\nSelect an attribute to update (or press Enter/Esc to finish):")
+  (setq activeMode initialMode)
+
+  (princ "\n========================================================")
+  (cond
+    ((= activeMode 'SYNC)
+     (princ "\n⚡ [ATTFIX] 1-Click Sync Mode:"))
+    ((= activeMode 'EDIT)
+     (princ "\n✏️ [ATTFIXEDIT] Edit & Sync Mode:"))
+    ((= activeMode 'GLOBAL)
+     (princ "\n🌐 [ATTFIXALL] Global All-Instances Mode:"))
+  )
+  (princ "\nClick any attribute -> Tag and Prompt will change to that value as it is!")
+  (princ "\n[Press Enter or Esc when done | Options: E = Edit Value, G = Global All, S = 1-Click Sync]")
+  (princ "\n========================================================")
 
   ;; Selection Loop
-  (while (setq entPair (nentsel "\nSelect attribute: "))
-    (setq ent (car entPair))
-    (setq entData (entget ent))
-    (setq entType (cdr (assoc 0 entData)))
+  (while
+    (progn
+      (initget "Edit Global Sync")
+      (setq entPair (nentsel (strcat "\nSelect attribute to sync [" 
+                                     (cond ((= activeMode 'SYNC) "1-Click Sync")
+                                           ((= activeMode 'EDIT) "Edit Value")
+                                           ((= activeMode 'GLOBAL) "Global All"))
+                                     "] (or Enter to finish): ")))
+    )
 
+    ;; Check if user typed a keyword option
     (cond
-      ;; ---------------------------------------------------------------------
-      ;; CASE 1: Attribute Reference (ATTRIB) on an inserted block
-      ;; ---------------------------------------------------------------------
-      ((= entType "ATTRIB")
-       (vla-StartUndoMark doc)
-       (setq attObj (vlax-ename->vla-object ent))
-       (setq oldVal (vla-get-TextString attObj))
-       (setq oldTag (vla-get-TagString attObj))
-
-       ;; Determine parent block
-       (setq parentList (cadddr entPair))
-       (setq parentEname (if parentList (last parentList) (cdr (assoc 330 entData))))
-       (setq blkRef (if parentEname (vlax-ename->vla-object parentEname) nil))
-       (setq blkName (if blkRef (attfix:get-block-name blkRef) "Unknown"))
-
-       (princ (strcat "\n📌 Found Attribute:"))
-       (princ (strcat "\n   • Block : " blkName))
-       (princ (strcat "\n   • Tag   : " oldTag))
-       (princ (strcat "\n   • Value : \"" oldVal "\""))
-
-       ;; Prompt for new text / name
-       (setq newName (getstring t (strcat "\nEnter new Name/Value for Tag, Prompt & Value <" 
-                                          (if (/= oldVal "") oldVal oldTag) ">: ")))
-       (if (= newName "")
-         (setq newName (if (/= oldVal "") oldVal oldTag))
-       )
-
-       (setq newTag (attfix:to-tag newName))
-       (setq newPrompt newName)
-
-       ;; 1. Update the picked attribute reference
-       (vla-put-TextString attObj newName)
-       (vla-put-TagString attObj newTag)
-       (vla-Update attObj)
-       (entupd ent)
-
-       ;; 2. Update the parent block definition (ATTDEF)
-       (setq defCount 0)
-       (if (/= blkName "Unknown")
-         (setq defCount (attfix:update-block-def doc blkName oldTag newTag newPrompt newName))
-       )
-
-       ;; 3. Synchronize existing instances in drawing
-       (setq instCount 0)
-       (if (/= blkName "Unknown")
-         (setq instCount (attfix:sync-instances doc blkName oldTag newTag newName globalValueUpdate))
-       )
-
-       (vla-EndUndoMark doc)
-
-       ;; Feedback
-       (princ (strcat "\n✅ SUCCESS for Block [" blkName "]:"))
-       (princ (strcat "\n   • Value  : \"" newName "\""))
-       (princ (strcat "\n   • Tag    : " newTag))
-       (princ (strcat "\n   • Prompt : \"" newPrompt "\""))
-       (if (> defCount 0)
-         (princ (strcat "\n   • Definition Updated: Tag & Prompt synced in Block Table."))
-       )
-       (if globalValueUpdate
-         (princ (strcat "\n   • All Instances: " (itoa instCount) " block reference(s) updated with new Tag & Value."))
-         (princ (strcat "\n   • Tag Sync: " (itoa instCount) " block reference(s) synced to Tag [" newTag "]."))
-       )
+      ((= entPair "Edit")
+       (setq activeMode 'EDIT)
+       (princ "\n✏️ Switched to Edit Mode. Pick an attribute to edit value and sync Tag/Prompt.")
+      )
+      ((= entPair "Global")
+       (setq activeMode 'GLOBAL)
+       (princ "\n🌐 Switched to Global Mode. Pick an attribute to sync across ALL block instances.")
+      )
+      ((= entPair "Sync")
+       (setq activeMode 'SYNC)
+       (princ "\n⚡ Switched to 1-Click Sync Mode. Click any attribute to sync Tag & Prompt to its Value as it is.")
       )
 
-      ;; ---------------------------------------------------------------------
-      ;; CASE 2: Attribute Definition (ATTDEF) in Block Editor or Model Space
-      ;; ---------------------------------------------------------------------
-      ((= entType "ATTDEF")
-       (vla-StartUndoMark doc)
-       (setq attObj (vlax-ename->vla-object ent))
-       (setq oldTag (vla-get-TagString attObj))
-       (setq oldPrompt (vla-get-PromptString attObj))
-       (setq oldVal (vla-get-TextString attObj))
+      ;; Entity picked
+      ((listp entPair)
+       (setq ent (car entPair))
+       (setq entData (entget ent))
+       (setq entType (cdr (assoc 0 entData)))
 
-       (princ (strcat "\n📌 Found Attribute Definition (ATTDEF):"))
-       (princ (strcat "\n   • Tag     : " oldTag))
-       (princ (strcat "\n   • Prompt  : \"" oldPrompt "\""))
-       (princ (strcat "\n   • Default : \"" oldVal "\""))
+       (cond
+         ;; ------------------------------------------------------------------
+         ;; CASE 1: Attribute Reference (ATTRIB) on an inserted block
+         ;; ------------------------------------------------------------------
+         ((= entType "ATTRIB")
+          (vla-StartUndoMark doc)
+          (setq attObj (vlax-ename->vla-object ent))
+          (setq oldVal (vla-get-TextString attObj))
+          (setq oldTag (vla-get-TagString attObj))
 
-       ;; Prompt for new text / name
-       (setq newName (getstring t (strcat "\nEnter new Name for Tag, Prompt & Default <" oldTag ">: ")))
-       (if (= newName "") (setq newName oldTag))
+          ;; Determine parent block
+          (setq parentList (cadddr entPair))
+          (setq parentEname (if parentList (last parentList) (cdr (assoc 330 entData))))
+          (setq blkRef (if parentEname (vlax-ename->vla-object parentEname) nil))
+          (setq blkName (if blkRef (attfix:get-block-name blkRef) "Unknown"))
 
-       (setq newTag (attfix:to-tag newName))
-       (setq newPrompt newName)
+          ;; Determine target value
+          (if (= activeMode 'EDIT)
+            ;; Edit Mode: ask user for new text
+            (progn
+              (setq targetVal (getstring t (strcat "\nEnter new Value for Block [" blkName "] <" oldVal ">: ")))
+              (if (= targetVal "") (setq targetVal oldVal))
+              (vla-put-TextString attObj targetVal)
+            )
+            ;; 1-Click Sync or Global Mode: use current value as it is!
+            (progn
+              (if (or (null oldVal) (= oldVal ""))
+                (progn
+                  (princ "\n⚠️ Current attribute value is empty.")
+                  (setq targetVal (getstring t (strcat "\nEnter value for Tag & Prompt <" oldTag ">: ")))
+                  (if (= targetVal "") (setq targetVal oldTag))
+                  (vla-put-TextString attObj targetVal)
+                )
+                (setq targetVal oldVal)
+              )
+            )
+          )
 
-       ;; Update ATTDEF properties
-       (vla-put-TagString attObj newTag)
-       (vla-put-PromptString attObj newPrompt)
-       (vla-put-TextString attObj newName)
-       (vla-Update attObj)
-       (entupd ent)
+          ;; 1. Update the picked attribute's Tag directly to that value as it is
+          (attfix:set-tag-safe attObj targetVal)
+          (vla-Update attObj)
+          (entupd ent)
 
-       (vla-EndUndoMark doc)
+          ;; 2. Update the parent block definition (ATTDEF)
+          (setq defCount 0)
+          (if (/= blkName "Unknown")
+            (setq defCount (attfix:update-block-def doc blkName oldTag targetVal))
+          )
 
-       (princ (strcat "\n✅ SUCCESS [ATTDEF Updated]:"))
-       (princ (strcat "\n   • Tag     : " newTag))
-       (princ (strcat "\n   • Prompt  : \"" newPrompt "\""))
-       (princ (strcat "\n   • Default : \"" newName "\""))
-      )
+          ;; 3. Synchronize existing instances in the drawing
+          (setq instCount 0)
+          (if (/= blkName "Unknown")
+            (setq instCount (attfix:sync-instances doc blkName oldTag targetVal
+                                                  (if (= activeMode 'GLOBAL) t nil)))
+          )
 
-      ;; ---------------------------------------------------------------------
-      ;; CASE 3: Not an attribute
-      ;; ---------------------------------------------------------------------
-      (t
-       (princ (strcat "\n⚠️ Selected object is a [" entType "], not an attribute."))
-       (princ "\n   Please click directly on an Attribute (ATTRIB or ATTDEF).")
+          (vla-EndUndoMark doc)
+
+          ;; Output feedback
+          (princ (strcat "\n✅ SUCCESS for Block [" blkName "]:"))
+          (princ (strcat "\n   • Value  : \"" (vla-get-TextString attObj) "\""))
+          (princ (strcat "\n   • Tag    : \"" (vla-get-TagString attObj) "\" (changed to Value as it is)"))
+          (princ (strcat "\n   • Prompt : \"" targetVal "\" (changed to Value as it is)"))
+          (if (> defCount 0)
+            (princ (strcat "\n   • Block Definition: ATTDEF Tag & Prompt updated in Block Table."))
+          )
+          (if (= activeMode 'GLOBAL)
+            (princ (strcat "\n   • Global Sync: " (itoa instCount) " instance(s) updated with new Tag & Value."))
+            (princ (strcat "\n   • Tag Sync: " (itoa instCount) " instance(s) synced to Tag \"" targetVal "\"."))
+          )
+         )
+
+         ;; ------------------------------------------------------------------
+         ;; CASE 2: Attribute Definition (ATTDEF) in Block Editor or Model Space
+         ;; ------------------------------------------------------------------
+         ((= entType "ATTDEF")
+          (vla-StartUndoMark doc)
+          (setq attObj (vlax-ename->vla-object ent))
+          (setq oldTag (vla-get-TagString attObj))
+          (setq oldPrompt (vla-get-PromptString attObj))
+          (setq oldVal (vla-get-TextString attObj))
+
+          ;; In ATTDEF, default text is in TextString
+          (if (and (/= oldVal "") (/= activeMode 'EDIT))
+            (setq targetVal oldVal)
+            (if (/= oldTag "")
+              (setq targetVal oldTag)
+              (setq targetVal "TAG")
+            )
+          )
+
+          (if (= activeMode 'EDIT)
+            (progn
+              (setq targetVal (getstring t (strcat "\nEnter new Name for Tag, Prompt & Default <" targetVal ">: ")))
+              (if (= targetVal "") (setq targetVal oldVal))
+            )
+          )
+
+          ;; Update ATTDEF properties to that value as it is
+          (attfix:set-tag-safe attObj targetVal)
+          (vl-catch-all-apply 'vla-put-PromptString (list attObj targetVal))
+          (vl-catch-all-apply 'vla-put-TextString (list attObj targetVal))
+          (vla-Update attObj)
+          (entupd ent)
+
+          (vla-EndUndoMark doc)
+
+          (princ (strcat "\n✅ SUCCESS [ATTDEF in Block Editor]:"))
+          (princ (strcat "\n   • Tag     : \"" targetVal "\" (changed to value as it is)"))
+          (princ (strcat "\n   • Prompt  : \"" targetVal "\" (changed to value as it is)"))
+          (princ (strcat "\n   • Default : \"" targetVal "\""))
+         )
+
+         ;; ------------------------------------------------------------------
+         ;; CASE 3: Not an attribute
+         ;; ------------------------------------------------------------------
+         (t
+          (princ (strcat "\n⚠️ Selected object is a [" entType "], not an attribute."))
+          (princ "\n   Please click directly on an Attribute (ATTRIB or ATTDEF).")
+         )
+       )
       )
     )
   )
@@ -312,31 +328,43 @@
 )
 
 ;;; -------------------------------------------------------------------------
-;;; COMMAND: ATTFIX / AF (Single Attribute + Tag/Prompt Sync)
+;;; COMMAND: ATTFIX / AF (1-Click Instant Sync to Value as it is)
 ;;; -------------------------------------------------------------------------
 (defun c:ATTFIX ()
-  (attfix:execute nil)
+  (attfix:run 'SYNC)
 )
 
 (defun c:AF ()
-  (attfix:execute nil)
+  (attfix:run 'SYNC)
 )
 
 ;;; -------------------------------------------------------------------------
-;;; COMMAND: ATTFIXALL / AFA (Global Value Update Across All Instances)
+;;; COMMAND: ATTFIXEDIT / AFE (Edit Value first, then sync Tag & Prompt)
+;;; -------------------------------------------------------------------------
+(defun c:ATTFIXEDIT ()
+  (attfix:run 'EDIT)
+)
+
+(defun c:AFE ()
+  (attfix:run 'EDIT)
+)
+
+;;; -------------------------------------------------------------------------
+;;; COMMAND: ATTFIXALL / AFA (Sync Tag & Prompt, and update Value across ALL blocks)
 ;;; -------------------------------------------------------------------------
 (defun c:ATTFIXALL ()
-  (attfix:execute t)
+  (attfix:run 'GLOBAL)
 )
 
 (defun c:AFA ()
-  (attfix:execute t)
+  (attfix:run 'GLOBAL)
 )
 
 ;;; -------------------------------------------------------------------------
 ;;; Load Notification
 ;;; -------------------------------------------------------------------------
 (princ "\n📦 ATTFIX.lsp loaded successfully!")
-(princ "\n   Type 'ATTFIX' or 'AF' to update attribute Value, Tag, & Prompt.")
-(princ "\n   Type 'ATTFIXALL' or 'AFA' to also update Value across all block instances.")
+(princ "\n   Type 'AF' or 'ATTFIX' -> 1-Click: Tag & Prompt change to that Value as it is.")
+(princ "\n   Type 'AFE'            -> Edit Mode: Enter new Value and sync.")
+(princ "\n   Type 'AFA'            -> Global Mode: Sync across all block instances.")
 (princ)
