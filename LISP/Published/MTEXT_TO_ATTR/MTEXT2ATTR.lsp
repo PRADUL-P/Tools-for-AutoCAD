@@ -5,23 +5,20 @@
 ;;; DESCRIPTION:
 ;;;   Batch-converts single-line TEXT and multi-line MTEXT objects into
 ;;;   Attribute Definitions (ATTDEF) in-place.
-;;;   Preserves exact position, alignment/justification, text height,
-;;;   rotation, layer, text style, color, and width factor.
 ;;;
-;;;   Works in:
-;;;     - Model Space
-;;;     - Paper Space (Layouts)
-;;;     - Inside the BLOCK EDITOR (BEDIT)!
+;;;   FEATURES:
+;;;     - Preserves original Letter Casing (no forced uppercase!).
+;;;     - Clean Prompt without any "Enter ... :" preloaded text.
+;;;     - Preserves exact position, alignment/justification, text height,
+;;;       rotation, layer, text style, color, width factor, and oblique angle.
+;;;     - Works in Model Space, Paper Space, and inside BLOCK EDITOR (BEDIT).
+;;;     - Supports pre-selection (pickfirst) and post-selection.
 ;;;
 ;;; COMMANDS:
 ;;;   MT2ATT  - Main command (MText / Text to Attribute)
 ;;;   M2A     - Fast keyboard shortcut
 ;;;   T2A     - Text to Attribute shortcut
 ;;;   TXT2ATT - Alias
-;;;
-;;; SELECTION:
-;;;   Supports selection BEFORE entering command (pre-selection / pickfirst)
-;;;   or AFTER entering command (window-select, crossing, pick, ALL).
 ;;;
 ;;; =========================================================================
 
@@ -57,10 +54,10 @@
 
 ;;; -------------------------------------------------------------------------
 ;;; HELPER: Convert text into a valid AutoCAD attribute Tag
-;;; (AutoCAD tags cannot have spaces or special punctuation)
+;;; Preserves exact case (no forced uppercase!) and replaces spaces with '_'
 ;;; -------------------------------------------------------------------------
 (defun text-to-tag (str fallback-idx / cleanStr res i ch)
-  (setq cleanStr (strcase (vl-string-trim " \t\r\n" str)))
+  (setq cleanStr (vl-string-trim " \t\r\n" str))
   (setq res "")
   (setq i 1)
   (while (<= i (strlen cleanStr))
@@ -72,8 +69,9 @@
          (setq res (strcat res "_"))
        )
       )
-      ;; Allowed: A-Z, 0-9, _, -, .
-      ((or (and (>= ch "A") (<= ch "Z"))
+      ;; Allowed: a-z, A-Z, 0-9, _, -, . (Preserves original case!)
+      ((or (and (>= ch "a") (<= ch "z"))
+           (and (>= ch "A") (<= ch "Z"))
            (and (>= ch "0") (<= ch "9"))
            (= ch "_")
            (= ch "-")
@@ -185,16 +183,16 @@
       (setq txt (vl-string-trim " \t\r\n" rawTxt))
     )
 
-    ;; 2. Generate Tag from text content
+    ;; 2. Generate Tag from text content (preserving original case!)
     (setq baseTag (text-to-tag txt cnt))
     (setq tag baseTag)
     (setq suffix 1)
     ;; Prevent duplicate tags in the same block/drawing
-    (while (member tag usedTags)
+    (while (member (strcase tag) usedTags)
       (setq suffix (1+ suffix))
       (setq tag (strcat baseTag "_" (itoa suffix)))
     )
-    (setq usedTags (cons tag usedTags))
+    (setq usedTags (cons (strcase tag) usedTags))
 
     ;; 3. Extract Alignment & Coordinates
     (cond
@@ -272,6 +270,7 @@
     )
 
     ;; 10. Create ATTDEF in the owning block/space
+    ;; Prompt is set directly to 'tag' (clean, no "Enter ... :" preloaded prefix!)
     (setq attObj
       (vl-catch-all-apply
         'vla-AddAttribute
@@ -279,9 +278,9 @@
           target
           (float height)
           0                            ; acAttributeModeNormal
-          (strcat "Enter " tag ":")    ; Prompt
+          tag                          ; Prompt -> clean, exactly matching tag!
           (vlax-3d-point insPoint)     ; Insertion point
-          tag                          ; Tag Name (from text!)
+          tag                          ; Tag Name (preserves original case!)
           txt                          ; Default Value
         )
       )
@@ -370,5 +369,5 @@
 ;;; -------------------------------------------------------------------------
 (princ "\n📦 MTEXT2ATTR.lsp loaded successfully!")
 (princ "\n   Type 'MT2ATT' or 'M2A' (or 'T2A') to convert Text/MText to Attributes.")
-(princ "\n   (Supports both TEXT and MTEXT, with pre-selection or post-selection!)")
+(princ "\n   (Preserves original case, clean prompt without 'Enter ... :')")
 (princ)
