@@ -17,6 +17,7 @@ LISP/
 │   ├── XLINE/                 ← Multi-spaced construction lines & shortcuts
 │   ├── TCOUNT_PLUS/           ← Advanced directional renumbering tool (LR, RL, TB, BT)
 │   ├── ATTFIX/                ← Attribute Value, Tag & Prompt synchronizer
+│   ├── BLOCK_RENAMER/         ← Fast on-screen & batch block renamer (BRN, BNAME)
 │   ├── MTEXT_TO_ATTR/         ← Convert MText to Attributes (BEDIT compatible)
 │   ├── SELECTION/             ← Selection helpers
 │   ├── HIDE_SHOW/             ← Hide/restore visibility tools

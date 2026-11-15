@@ -20,6 +20,7 @@ Tools-for-AutoCAD/
     │   ├── XLINE/                 ← Multi-spaced construction lines (XVN, XHN, XH, XV, etc.)
     │   ├── TCOUNT_PLUS/           ← Advanced directional renumbering (LR, RL, TB, BT, SEL)
     │   ├── ATTFIX/                ← Attribute Value, Tag & Prompt synchronizer (AF, ATTFIX)
+    │   ├── BLOCK_RENAMER/         ← Fast on-screen & batch block renamer (BRN, BNAME)
     │   ├── MTEXT_TO_ATTR/         ← In-place MText to ATTDEF conversion (BEDIT ready)
     │   ├── SELECTION/             ← Fast object selection (SA, SR)
     │   ├── HIDE_SHOW/             ← Element isolation & visibility tools (HH, HR)
@@ -39,6 +40,7 @@ Tools-for-AutoCAD/
 | **Construction Lines** | `XVN`, `XHN`, `XH`, `XV`, `XA`, `XB`, `XO` | Extended XLINE tools. Includes **arraying multiple vertical/horizontal construction lines** with custom spacing and cursor-direction detection. | [`/Published/XLINE/`](./LISP/Published/XLINE/) |
 | **Directional Renumbering** | `TC`, `TCOUNTPLUS` | Enhanced replacement for Express Tool `TCOUNT`. Renumber text/attributes in **any direction** (`LR`, `RL`, `TB`, `BT`, `SEL`), with simultaneous prefix, suffix, and leading zero padding. | [`/Published/TCOUNT_PLUS/`](./LISP/Published/TCOUNT_PLUS/) |
 | **Attribute Synchronizer** | `ATTFIX`, `AF` | Instantly updates **Tag and Prompt** based on **Value** for all selected blocks (supports pre- and post-selection). | [`/Published/ATTFIX/`](./LISP/Published/ATTFIX/) |
+| **Block Renamer** | `BRN`, `BNAME`, `BLOCKRENAME` | Fast block renamer: Click-to-rename on screen, dynamic block safe, batch Find & Replace, Prefix & Suffix. | [`/Published/BLOCK_RENAMER/`](./LISP/Published/BLOCK_RENAMER/) |
 | **Text/MText to Attribute** | `MT2ATT`, `M2A`, `T2A` | Batch-converts single-line Text and MText into Attribute Definitions (`ATTDEF`) in-place. Fully compatible with **Block Editor (`BEDIT`)**, preserves styles, layers, colors, and justifications. | [`/Published/MTEXT_TO_ATTR/`](./LISP/Published/MTEXT_TO_ATTR/) |
 | **Selection Tools** | `SA`, `SR` | Fast selection and replacement of similar objects by layer, entity type, or block name. | [`/Published/SELECTION/`](./LISP/Published/SELECTION/) |
 | **Visibility Management**| `HH`, `HR` | Temporarily isolate/hide and restore visibility of selected drawing elements. | [`/Published/HIDE_SHOW/`](./LISP/Published/HIDE_SHOW/) |
