@@ -1,36 +1,57 @@
 # 🛠️ AutoCAD LISP Directory
 
-Welcome to the **Tools-for-AutoCAD** LISP catalog! Following professional engineering and BIM development standards, the tools are organized into two distinct phases:
-
-1. **[`/Published/`](./Published/)** — Stable, verified, and production-ready tools for daily drafting.
-2. **[`/Testing/`](./Testing/)** — Experimental features, beta tools, and active prototypes undergoing field validation.
+Welcome to the **Tools-for-AutoCAD** LISP catalog! All scripts here are **100% verified, field-tested, and production-ready** for daily drafting in AutoCAD.
 
 ---
 
-## 📁 Organization Overview
+## 📁 Repository Structure
 
 ```
 LISP/
 ├── README.md                  ← You are here
-├── Published/                 ← Production-ready tools
-│   ├── README.md
-│   ├── XLINE/                 ← Multi-spaced construction lines & shortcuts
-│   ├── TCOUNT_PLUS/           ← Advanced directional renumbering tool (LR, RL, TB, BT)
-│   ├── ATTFIX/                ← Attribute Value, Tag & Prompt synchronizer
-│   ├── BLOCK_RENAMER/         ← Fast on-screen & batch block renamer (BRN, BNAME)
-│   ├── MTEXT_TO_ATTR/         ← Convert MText to Attributes (BEDIT compatible)
-│   ├── SELECTION/             ← Selection helpers
-│   ├── HIDE_SHOW/             ← Hide/restore visibility tools
-│   └── Create Similar/        ← Create similar elements
-└── Testing/                   ← Beta & Experimental tools
+└── Published/                 ← Production-Ready Tools (Tested & Verified)
     ├── README.md
-    ├── TWO_WAY_SYNC/          ← Two-way live section tag synchronizer (in testing)
-    └── LINK_TEXT/             ← Dynamic Field-based section linkers (in testing)
+    ├── XLINE/                 ← Multi-spaced construction lines & shortcuts (XVN, XHN, etc.)
+    ├── TCOUNT_PLUS/           ← Advanced directional renumbering tool (TC, TCOUNTPLUS)
+    ├── ATTFIX/                ← Instant Attribute Value, Tag & Prompt synchronizer (AF, ATTFIX)
+    ├── BLOCK_RENAMER/         ← Fast on-screen & batch block renamer (BRN, BNAME)
+    ├── MTEXT_TO_ATTR/         ← In-place Text/MText to ATTDEF conversion (M2A, MT2ATT)
+    ├── SELECTION/             ← Selection helpers (SA, SAT, SAL, SAC, etc.)
+    ├── HIDE_SHOW/             ← Hide/isolate/restore visibility tools (HH, IL, HR)
+    └── Create Similar/        ← Create matching elements (CS)
 ```
 
 ---
 
-## 🚀 Quick Navigation
+## 🟢 Published & Tested Tools Index
 
-- 🟢 **Explore Production Tools**: Go to [**`LISP/Published/`**](./Published/) for tools ready to integrate into your standard CAD workflows.
-- 🟡 **Explore Beta Tools**: Go to [**`LISP/Testing/`**](./Testing/) to try experimental routines and provide feedback.
+All tools below are located in [`/Published/`](./Published/) and ready for daily production:
+
+| Toolset | Core Commands | Description | Documentation |
+|---|---|---|---|
+| **[XLINE](./Published/XLINE/)** | `XVN`, `XHN`, `XH`, `XV`, `XA`, `XB`, `XO` | Multi-spaced construction lines with cursor direction detection, fast axis shortcuts. | [View Details](./Published/XLINE/README.md) |
+| **[TCOUNT_PLUS](./Published/TCOUNT_PLUS/)** | `TC`, `TCOUNTPLUS` | Advanced directional renumbering tool (LR, RL, TB, BT, Selection order) with prefix, suffix & leading zeros. | [View Details](./Published/TCOUNT_PLUS/README.md) |
+| **[ATTFIX](./Published/ATTFIX/)** | `ATTFIX`, `AF` | Batch attribute synchronizer: Instantly updates Tag & Prompt based on Value (supports pre/post selection). | [View Details](./Published/ATTFIX/README.md) |
+| **[BLOCK_RENAMER](./Published/BLOCK_RENAMER/)** | `BRN`, `BNAME`, `BLOCKRENAME` | Fast block renamer: Click-to-rename on screen, dynamic block safe, batch Find & Replace, Prefix & Suffix. | [View Details](./Published/BLOCK_RENAMER/README.md) |
+| **[MTEXT_TO_ATTR](./Published/MTEXT_TO_ATTR/)** | `MT2ATT`, `M2A`, `T2A` | Batch-converts Text and MText objects into Attribute Definitions (`ATTDEF`) in-place. Works inside **Block Editor (`BEDIT`)**. | [View Details](./Published/MTEXT_TO_ATTR/README.md) |
+| **[SELECTION](./Published/SELECTION/)** | `SA`, `SAT`, `SAL`, `SAC`, `SAB`, `SLT`, `SAA` | High-speed selection of similar objects by layer, entity type, color, or block definition. | [View Details](./Published/SELECTION/README.md) |
+| **[HIDE_SHOW](./Published/HIDE_SHOW/)** | `HH`, `IL`, `HR` | Temporarily isolate/hide and restore drawing elements for clutter-free drafting. | [View Details](./Published/HIDE_SHOW/README.md) |
+| **[Create Similar](./Published/Create%20Similar/)** | `CS` | Create matching elements based on selected entity properties. | [View Details](./Published/Create%20Similar/) |
+
+---
+
+## 🔮 Upcoming Features (Roadmap)
+
+The following advanced tools are currently in research and development and will be published once tested and verified:
+
+* **Two-Way Live Section Tag Synchronizer (`TWO_WAY_SYNC`)**:  
+  Bidirectional real-time live synchronization between matching callout/section tags across drawings and viewports using AutoLISP Object Reactors.
+
+* **Dynamic Field-Based Section Linker (`LINK_TEXT`)**:  
+  Automated text-linking using native AutoCAD Field codes (`%<\AcObjProp ...>%`) across horizontal, vertical, and detail sections.
+
+---
+
+## 📥 How to Load
+1. Use AutoCAD's `APPLOAD` command, select the `.lsp` file from any of the subfolders in `/Published/`, and click **Load**.
+2. To keep them loaded permanently, add them to your **Startup Suite** (briefcase icon in APPLOAD).

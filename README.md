@@ -2,58 +2,55 @@
 
 > 🔧 **Tools for AutoCAD** is a curated collection of production-grade **AutoLISP scripts and automation tools** designed to supercharge your CAD workflow. Built with a focus on **efficiency, precision, and practical field use**, this repository enables engineers, architects, and drafters to eliminate repetitive tasks, automate complex drawings, and speed up project delivery.
 
-> 🧠 Unlock **CAD automation directly within AutoCAD** — 100% native AutoLISP, zero third-party plugins required.
+> 🧠 Unlock **CAD automation directly within AutoCAD** — 100% native AutoLISP, zero third-party plugins required. All published tools are **100% tested and verified** for daily production drafting.
 
 ---
 
 ## 🏗️ Repository Architecture
 
-Similar to professional BIM/Revit standards, tools are separated into **Published (Production)** and **Testing (Beta)** stages:
-
 ```
 Tools-for-AutoCAD/
-├── README.md
+├── README.md                  ← Repository Overview
 └── LISP/
-    ├── README.md
-    │
-    ├── Published/                 ← Production-Ready Tools (Daily Drafting)
-    │   ├── XLINE/                 ← Multi-spaced construction lines (XVN, XHN, XH, XV, etc.)
-    │   ├── TCOUNT_PLUS/           ← Advanced directional renumbering (LR, RL, TB, BT, SEL)
-    │   ├── ATTFIX/                ← Attribute Value, Tag & Prompt synchronizer (AF, ATTFIX)
-    │   ├── BLOCK_RENAMER/         ← Fast on-screen & batch block renamer (BRN, BNAME)
-    │   ├── MTEXT_TO_ATTR/         ← In-place MText to ATTDEF conversion (BEDIT ready)
-    │   ├── SELECTION/             ← Fast object selection (SA, SR)
-    │   ├── HIDE_SHOW/             ← Element isolation & visibility tools (HH, HR)
-    │   └── Create Similar/        ← Quick creation of matching objects
-    │
-    └── Testing/                   ← Experimental / Active Development (Beta)
-        ├── TWO_WAY_SYNC/          ← True Two-Way live section tag synchronizer
-        └── LINK_TEXT/             ← Dynamic Field-based text linkers across sections
+    ├── README.md              ← LISP Directory & Index
+    └── Published/             ← Production-Ready & Tested Tools
+        ├── README.md
+        ├── XLINE/             ← Multi-spaced construction lines (XVN, XHN, XH, XV, etc.)
+        ├── TCOUNT_PLUS/       ← Advanced directional renumbering (TC, TCOUNTPLUS)
+        ├── ATTFIX/            ← Instant Attribute Tag & Prompt synchronizer (AF, ATTFIX)
+        ├── BLOCK_RENAMER/     ← Fast on-screen & batch block renamer (BRN, BNAME)
+        ├── MTEXT_TO_ATTR/     ← In-place Text/MText to ATTDEF conversion (M2A, MT2ATT)
+        ├── SELECTION/         ← Fast object selection (SA, SAT, SAL, SAC, etc.)
+        ├── HIDE_SHOW/         ← Element isolation & visibility tools (HH, IL, HR)
+        └── Create Similar/    ← Quick creation of matching objects (CS)
 ```
 
 ---
 
-## 🟢 Published Tools (Production-Ready)
+## 🟢 Published & Tested Tools (Production-Ready)
 
 | Toolset | Commands | Description | Folder |
 |---|---|---|---|
-| **Construction Lines** | `XVN`, `XHN`, `XH`, `XV`, `XA`, `XB`, `XO` | Extended XLINE tools. Includes **arraying multiple vertical/horizontal construction lines** with custom spacing and cursor-direction detection. | [`/Published/XLINE/`](./LISP/Published/XLINE/) |
-| **Directional Renumbering** | `TC`, `TCOUNTPLUS` | Enhanced replacement for Express Tool `TCOUNT`. Renumber text/attributes in **any direction** (`LR`, `RL`, `TB`, `BT`, `SEL`), with simultaneous prefix, suffix, and leading zero padding. | [`/Published/TCOUNT_PLUS/`](./LISP/Published/TCOUNT_PLUS/) |
-| **Attribute Synchronizer** | `ATTFIX`, `AF` | Instantly updates **Tag and Prompt** based on **Value** for all selected blocks (supports pre- and post-selection). | [`/Published/ATTFIX/`](./LISP/Published/ATTFIX/) |
-| **Block Renamer** | `BRN`, `BNAME`, `BLOCKRENAME` | Fast block renamer: Click-to-rename on screen, dynamic block safe, batch Find & Replace, Prefix & Suffix. | [`/Published/BLOCK_RENAMER/`](./LISP/Published/BLOCK_RENAMER/) |
-| **Text/MText to Attribute** | `MT2ATT`, `M2A`, `T2A` | Batch-converts single-line Text and MText into Attribute Definitions (`ATTDEF`) in-place. Fully compatible with **Block Editor (`BEDIT`)**, preserves styles, layers, colors, and justifications. | [`/Published/MTEXT_TO_ATTR/`](./LISP/Published/MTEXT_TO_ATTR/) |
-| **Selection Tools** | `SA`, `SR` | Fast selection and replacement of similar objects by layer, entity type, or block name. | [`/Published/SELECTION/`](./LISP/Published/SELECTION/) |
-| **Visibility Management**| `HH`, `HR` | Temporarily isolate/hide and restore visibility of selected drawing elements. | [`/Published/HIDE_SHOW/`](./LISP/Published/HIDE_SHOW/) |
-| **Create Similar** | Property matching | Quickly spawn new entities matching existing element properties. | [`/Published/Create Similar/`](./LISP/Published/Create%20Similar/) |
+| **Construction Lines** | `XVN`, `XHN`, `XH`, `XV`, `XA`, `XB`, `XO` | Extended XLINE tools. Includes **arraying multiple vertical/horizontal construction lines** with custom spacing and cursor-direction detection. | [`/LISP/Published/XLINE/`](./LISP/Published/XLINE/) |
+| **Directional Renumbering** | `TC`, `TCOUNTPLUS` | Enhanced replacement for Express Tool `TCOUNT`. Renumber text/attributes in **any direction** (`LR`, `RL`, `TB`, `BT`, `SEL`), with simultaneous prefix, suffix, and leading zero padding. | [`/LISP/Published/TCOUNT_PLUS/`](./LISP/Published/TCOUNT_PLUS/) |
+| **Attribute Synchronizer** | `ATTFIX`, `AF` | Instantly updates **Tag and Prompt** based on **Value** for all selected blocks (supports pre- and post-selection). | [`/LISP/Published/ATTFIX/`](./LISP/Published/ATTFIX/) |
+| **Block Renamer** | `BRN`, `BNAME`, `BLOCKRENAME` | Fast block renamer: Click-to-rename on screen, dynamic block safe, batch Find & Replace, Prefix & Suffix. | [`/LISP/Published/BLOCK_RENAMER/`](./LISP/Published/BLOCK_RENAMER/) |
+| **Text/MText to Attribute** | `MT2ATT`, `M2A`, `T2A` | Batch-converts single-line Text and MText into Attribute Definitions (`ATTDEF`) in-place. Fully compatible with **Block Editor (`BEDIT`)**, preserves styles, layers, colors, and justifications. | [`/LISP/Published/MTEXT_TO_ATTR/`](./LISP/Published/MTEXT_TO_ATTR/) |
+| **Selection Tools** | `SA`, `SAT`, `SAL`, `SAC`, `SAB`, `SLT`, `SAA` | Fast selection and filtering of similar objects by layer, entity type, color, or block name. | [`/LISP/Published/SELECTION/`](./LISP/Published/SELECTION/) |
+| **Visibility Management**| `HH`, `IL`, `HR` | Temporarily isolate/hide and restore visibility of selected drawing elements. | [`/LISP/Published/HIDE_SHOW/`](./LISP/Published/HIDE_SHOW/) |
+| **Create Similar** | `CS` | Quickly spawn new entities matching existing element properties (ADDSELECTED wrapper). | [`/LISP/Published/Create Similar/`](./LISP/Published/Create%20Similar/) |
 
 ---
 
-## 🟡 Testing Tools (Experimental / Beta)
+## 🔮 Upcoming Features (Roadmap)
 
-| Toolset | Commands | Status | Description | Folder |
-|---|---|---|---|---|
-| **Two-Way Live Sync** | `TWOWAYSYNC`, `TWOWAY1`, `SYNCALL` | **Beta** | Live bidirectional synchronization between matching numbers/tags across sections using AutoLISP Object Reactors. | [`/Testing/TWO_WAY_SYNC/`](./LISP/Testing/TWO_WAY_SYNC/) |
-| **Dynamic Fields Linker** | `LINKBATCH`, `LINK1`, `COPYLINK` | **Beta** | One-way dynamic linking across sections using native AutoCAD DWG Fields (`%<\AcObjProp ...>%`). | [`/Testing/LINK_TEXT/`](./LISP/Testing/LINK_TEXT/) |
+*Note: The tools below are currently in research & development and are planned for future release:*
+
+* **Two-Way Live Section Tag Synchronizer (`TWO_WAY_SYNC`)**:  
+  Bidirectional real-time live synchronization between matching callout/section tags across drawings and viewports using AutoLISP Object Reactors.
+
+* **Dynamic Field-Based Section Linker (`LINK_TEXT`)**:  
+  Automated text-linking using native AutoCAD DWG Field codes (`%<\AcObjProp ...>%`) across horizontal, vertical, and detail sections.
 
 ---
 
@@ -63,25 +60,13 @@ Tools-for-AutoCAD/
 1. In AutoCAD, type `APPLOAD` and press **Enter**.
 2. Navigate to the desired `.lsp` file inside the `LISP/Published/` subfolders.
 3. Click **Load**.
-4. *(Optional)* Add the script to your **Startup Suite** (briefcase icon) to auto-load every time AutoCAD starts.
+4. *(Optional)* Add the script to your **Startup Suite** (briefcase icon) to keep it loaded automatically in every drawing session.
 
-### Method 2: Command Line
+### Method 2: Command Line Direct Load
 ```lisp
-(load "path/to/script.lsp")
+(load "E:/AUTOCAD/Tools-for-AutoCAD/LISP/Published/ATTFIX/ATTFIX.lsp")
+(load "E:/AUTOCAD/Tools-for-AutoCAD/LISP/Published/BLOCK_RENAMER/BLOCK_RENAMER.lsp")
+(load "E:/AUTOCAD/Tools-for-AutoCAD/LISP/Published/MTEXT_TO_ATTR/MTEXT2ATTR.lsp")
+(load "E:/AUTOCAD/Tools-for-AutoCAD/LISP/Published/TCOUNT_PLUS/TCOUNT_PLUS.lsp")
+(load "E:/AUTOCAD/Tools-for-AutoCAD/LISP/Published/XLINE/XLINE_ALL.lsp")
 ```
-
----
-
-## 📝 Revision & Changelog
-
-### Version 2.2
-- **Two-Tier Architecture**: Reorganized toolset into **`Published/`** (production-ready) and **`Testing/`** (beta/experimental) directories.
-- **Published Release of `XVN` & `XHN`**: Verified vertical/horizontal multi-line arrays with cursor direction input.
-- **Published Release of `MT2ATT`**: Verified in-place attribute creation working seamlessly inside Block Editor (`BEDIT`).
-- **Testing Migration**: Relocated `TWO_WAY_SYNC` and `LINK_TEXT` into `Testing/` for continued field refinement on complex multi-attribute blocks.
-
----
-
-## 🤝 Contributions & License
-
-Contributions, feedback, and issue reports are welcome! Built for engineers, architects, drafters, and CAD professionals worldwide.
