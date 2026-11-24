@@ -13,34 +13,49 @@ Tools-for-AutoCAD/
 ├── README.md                  ← Repository Overview
 └── LISP/
     ├── README.md              ← LISP Directory & Index
-    └── Published/             ← Production-Ready & Tested Tools
+    │
+    ├── Published/             ← Production-Ready & Verified Tools
+    │   ├── README.md
+    │   ├── XLINE/             ← Multi-spaced construction lines (XVN, XHN, XH, XV, etc.)
+    │   ├── TCOUNT_PLUS/       ← Advanced directional renumbering (TC, TCOUNTPLUS)
+    │   ├── ATTFIX/            ← Instant Attribute Tag & Prompt synchronizer (AF, ATTFIX)
+    │   ├── BLOCK_RENAMER/     ← Fast on-screen & batch block renamer (BRN, BNAME)
+    │   ├── MTEXT_TO_ATTR/     ← In-place Text/MText to ATTDEF conversion (M2A, MT2ATT)
+    │   ├── SELECTION/         ← Fast object selection (SA, SAT, SAL, SAC, etc.)
+    │   ├── HIDE_SHOW/         ← Element isolation & visibility tools (HH, IL, HR)
+    │   └── Create Similar/    ← Quick creation of matching objects (CS)
+    │
+    └── Testing/               ← Tools Under Active Evaluation & Testing
         ├── README.md
-        ├── XLINE/             ← Multi-spaced construction lines (XVN, XHN, XH, XV, etc.)
-        ├── TCOUNT_PLUS/       ← Advanced directional renumbering (TC, TCOUNTPLUS)
-        ├── ATTFIX/            ← Instant Attribute Tag & Prompt synchronizer (AF, ATTFIX)
-        ├── AUTODIM/           ← Smart Auto-Dimensioning suite (ADIM, AUTODIM, AD)
-        ├── BLOCK_RENAMER/     ← Fast on-screen & batch block renamer (BRN, BNAME)
-        ├── MTEXT_TO_ATTR/     ← In-place Text/MText to ATTDEF conversion (M2A, MT2ATT)
-        ├── SELECTION/         ← Fast object selection (SA, SAT, SAL, SAC, etc.)
-        ├── HIDE_SHOW/         ← Element isolation & visibility tools (HH, IL, HR)
-        └── Create Similar/    ← Quick creation of matching objects (CS)
+        └── AUTODIM/           ← Smart Auto-Dimensioning suite (ADIM, AUTODIM, AD)
 ```
 
 ---
 
 ## 🟢 Published & Tested Tools (Production-Ready)
 
+All tools in this section have been personally tested and verified in real drafting workflows:
+
 | Toolset | Commands | Description | Folder |
 |---|---|---|---|
 | **Construction Lines** | `XVN`, `XHN`, `XH`, `XV`, `XA`, `XB`, `XO` | Extended XLINE tools. Includes **arraying multiple vertical/horizontal construction lines** with custom spacing and cursor-direction detection. | [`/LISP/Published/XLINE/`](./LISP/Published/XLINE/) |
 | **Directional Renumbering** | `TC`, `TCOUNTPLUS` | Enhanced replacement for Express Tool `TCOUNT`. Renumber text/attributes in **any direction** (`LR`, `RL`, `TB`, `BT`, `SEL`), with simultaneous prefix, suffix, and leading zero padding. | [`/LISP/Published/TCOUNT_PLUS/`](./LISP/Published/TCOUNT_PLUS/) |
 | **Attribute Synchronizer** | `ATTFIX`, `AF` | Instantly updates **Tag and Prompt** based on **Value** for all selected blocks (supports pre- and post-selection). | [`/LISP/Published/ATTFIX/`](./LISP/Published/ATTFIX/) |
-| **Auto-Dimensioning** | `ADIM`, `AUTODIM`, `AD` | Smart Auto-Dimensioning suite: Bounding Box (overall W/H), Segments (each edge), and Chain (continuous grid). | [`/LISP/Published/AUTODIM/`](./LISP/Published/AUTODIM/) |
 | **Block Renamer** | `BRN`, `BNAME`, `BLOCKRENAME` | Fast block renamer: Click-to-rename on screen, dynamic block safe, batch Find & Replace, Prefix & Suffix. | [`/LISP/Published/BLOCK_RENAMER/`](./LISP/Published/BLOCK_RENAMER/) |
 | **Text/MText to Attribute** | `MT2ATT`, `M2A`, `T2A` | Batch-converts single-line Text and MText into Attribute Definitions (`ATTDEF`) in-place. Fully compatible with **Block Editor (`BEDIT`)**, preserves styles, layers, colors, and justifications. | [`/LISP/Published/MTEXT_TO_ATTR/`](./LISP/Published/MTEXT_TO_ATTR/) |
 | **Selection Tools** | `SA`, `SAT`, `SAL`, `SAC`, `SAB`, `SLT`, `SAA` | Fast selection and filtering of similar objects by layer, entity type, color, or block name. | [`/LISP/Published/SELECTION/`](./LISP/Published/SELECTION/) |
 | **Visibility Management**| `HH`, `IL`, `HR` | Temporarily isolate/hide and restore visibility of selected drawing elements. | [`/LISP/Published/HIDE_SHOW/`](./LISP/Published/HIDE_SHOW/) |
 | **Create Similar** | `CS` | Quickly spawn new entities matching existing element properties (ADDSELECTED wrapper). | [`/LISP/Published/Create Similar/`](./LISP/Published/Create%20Similar/) |
+
+---
+
+## 🟡 Testing Tools (Under Active Evaluation)
+
+Tools in this section are in the **testing and refinement phase** awaiting validation before moving to `/Published/`:
+
+| Toolset | Commands | Description | Folder |
+|---|---|---|---|
+| **Auto-Dimensioning** | `ADIM`, `AUTODIM`, `AD` | Smart Auto-Dimensioning suite: Bounding Box (overall W/H), Segments (each edge), and Chain (continuous grid). | [`/LISP/Testing/AUTODIM/`](./LISP/Testing/AUTODIM/) |
 
 ---
 
@@ -60,16 +75,19 @@ Tools-for-AutoCAD/
 
 ### Method 1: APPLOAD (Recommended)
 1. In AutoCAD, type `APPLOAD` and press **Enter**.
-2. Navigate to the desired `.lsp` file inside the `LISP/Published/` subfolders.
+2. Navigate to the desired `.lsp` file inside the `LISP/Published/` or `LISP/Testing/` subfolders.
 3. Click **Load**.
-4. *(Optional)* Add the script to your **Startup Suite** (briefcase icon) to keep it loaded automatically in every drawing session.
+4. *(Optional)* Add production scripts to your **Startup Suite** (briefcase icon) to keep them loaded automatically in every drawing session.
 
 ### Method 2: Command Line Direct Load
 ```lisp
+;; Production Tools
 (load "E:/AUTOCAD/Tools-for-AutoCAD/LISP/Published/ATTFIX/ATTFIX.lsp")
-(load "E:/AUTOCAD/Tools-for-AutoCAD/LISP/Published/AUTODIM/AUTODIM.lsp")
 (load "E:/AUTOCAD/Tools-for-AutoCAD/LISP/Published/BLOCK_RENAMER/BLOCK_RENAMER.lsp")
 (load "E:/AUTOCAD/Tools-for-AutoCAD/LISP/Published/MTEXT_TO_ATTR/MTEXT2ATTR.lsp")
 (load "E:/AUTOCAD/Tools-for-AutoCAD/LISP/Published/TCOUNT_PLUS/TCOUNT_PLUS.lsp")
 (load "E:/AUTOCAD/Tools-for-AutoCAD/LISP/Published/XLINE/XLINE_ALL.lsp")
+
+;; Testing Tools
+(load "E:/AUTOCAD/Tools-for-AutoCAD/LISP/Testing/AUTODIM/AUTODIM.lsp")
 ```
