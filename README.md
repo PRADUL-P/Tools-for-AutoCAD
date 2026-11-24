@@ -18,6 +18,7 @@ Tools-for-AutoCAD/
         ├── XLINE/             ← Multi-spaced construction lines (XVN, XHN, XH, XV, etc.)
         ├── TCOUNT_PLUS/       ← Advanced directional renumbering (TC, TCOUNTPLUS)
         ├── ATTFIX/            ← Instant Attribute Tag & Prompt synchronizer (AF, ATTFIX)
+        ├── AUTODIM/           ← Smart Auto-Dimensioning suite (ADIM, AUTODIM, AD)
         ├── BLOCK_RENAMER/     ← Fast on-screen & batch block renamer (BRN, BNAME)
         ├── MTEXT_TO_ATTR/     ← In-place Text/MText to ATTDEF conversion (M2A, MT2ATT)
         ├── SELECTION/         ← Fast object selection (SA, SAT, SAL, SAC, etc.)
@@ -34,6 +35,7 @@ Tools-for-AutoCAD/
 | **Construction Lines** | `XVN`, `XHN`, `XH`, `XV`, `XA`, `XB`, `XO` | Extended XLINE tools. Includes **arraying multiple vertical/horizontal construction lines** with custom spacing and cursor-direction detection. | [`/LISP/Published/XLINE/`](./LISP/Published/XLINE/) |
 | **Directional Renumbering** | `TC`, `TCOUNTPLUS` | Enhanced replacement for Express Tool `TCOUNT`. Renumber text/attributes in **any direction** (`LR`, `RL`, `TB`, `BT`, `SEL`), with simultaneous prefix, suffix, and leading zero padding. | [`/LISP/Published/TCOUNT_PLUS/`](./LISP/Published/TCOUNT_PLUS/) |
 | **Attribute Synchronizer** | `ATTFIX`, `AF` | Instantly updates **Tag and Prompt** based on **Value** for all selected blocks (supports pre- and post-selection). | [`/LISP/Published/ATTFIX/`](./LISP/Published/ATTFIX/) |
+| **Auto-Dimensioning** | `ADIM`, `AUTODIM`, `AD` | Smart Auto-Dimensioning suite: Bounding Box (overall W/H), Segments (each edge), and Chain (continuous grid). | [`/LISP/Published/AUTODIM/`](./LISP/Published/AUTODIM/) |
 | **Block Renamer** | `BRN`, `BNAME`, `BLOCKRENAME` | Fast block renamer: Click-to-rename on screen, dynamic block safe, batch Find & Replace, Prefix & Suffix. | [`/LISP/Published/BLOCK_RENAMER/`](./LISP/Published/BLOCK_RENAMER/) |
 | **Text/MText to Attribute** | `MT2ATT`, `M2A`, `T2A` | Batch-converts single-line Text and MText into Attribute Definitions (`ATTDEF`) in-place. Fully compatible with **Block Editor (`BEDIT`)**, preserves styles, layers, colors, and justifications. | [`/LISP/Published/MTEXT_TO_ATTR/`](./LISP/Published/MTEXT_TO_ATTR/) |
 | **Selection Tools** | `SA`, `SAT`, `SAL`, `SAC`, `SAB`, `SLT`, `SAA` | Fast selection and filtering of similar objects by layer, entity type, color, or block name. | [`/LISP/Published/SELECTION/`](./LISP/Published/SELECTION/) |
@@ -65,6 +67,7 @@ Tools-for-AutoCAD/
 ### Method 2: Command Line Direct Load
 ```lisp
 (load "E:/AUTOCAD/Tools-for-AutoCAD/LISP/Published/ATTFIX/ATTFIX.lsp")
+(load "E:/AUTOCAD/Tools-for-AutoCAD/LISP/Published/AUTODIM/AUTODIM.lsp")
 (load "E:/AUTOCAD/Tools-for-AutoCAD/LISP/Published/BLOCK_RENAMER/BLOCK_RENAMER.lsp")
 (load "E:/AUTOCAD/Tools-for-AutoCAD/LISP/Published/MTEXT_TO_ATTR/MTEXT2ATTR.lsp")
 (load "E:/AUTOCAD/Tools-for-AutoCAD/LISP/Published/TCOUNT_PLUS/TCOUNT_PLUS.lsp")
