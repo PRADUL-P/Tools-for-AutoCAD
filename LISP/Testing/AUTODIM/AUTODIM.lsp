@@ -5,17 +5,21 @@
 ;;; DESCRIPTION:
 ;;;   A comprehensive, high-productivity auto-dimensioning suite supporting:
 ;;;
-;;;   1. Bounding Box Mode [B]:
+;;;   1. Segments & Geometry Mode [S]:
+;;;      Automatically detects entity types and places appropriate dimensions:
+;;;        - LINE           ➜ Aligned linear dimension
+;;;        - LWPOLYLINE     ➜ Aligned dimension for straight edges,
+;;;                           and Radius (R) dimension for curved/fillet edges
+;;;        - CIRCLE         ➜ Diameter (⌀) dimension
+;;;        - ARC            ➜ Radius (R) dimension
+;;;
+;;;   2. Bounding Box Mode [B]:
 ;;;      Instantly places overall Width & Height dimensions around any
 ;;;      selected objects (blocks, walls, rooms, mechanical parts).
 ;;;
-;;;   2. Segment Mode [S]:
-;;;      Batch-dimensions every segment of selected lines and polylines with
-;;;      aligned dimensions, automatic perpendicular offset, and duplicate filtering.
-;;;
 ;;;   3. Chain / Grid Mode [C]:
-;;;      Generates continuous chain dimensions between lines/grids along the
-;;;      X or Y axis, plus an overall total dimension line!
+;;;      Generates continuous chain dimensions between lines/grids/centers
+;;;      along the X or Y axis, plus an overall total dimension line!
 ;;;
 ;;; FEATURES:
 ;;;   - Supports selection BEFORE or AFTER entering command (Pre-selection / Pickfirst).
@@ -46,20 +50,6 @@
 )
 
 ;;; -------------------------------------------------------------------------
-;;; HELPER: Normalize 2D point (strips Z coordinate)
-;;; -------------------------------------------------------------------------
-(defun adim:pt2d (pt)
-  (list (car pt) (cadr pt))
-)
-
-;;; -------------------------------------------------------------------------
-;;; HELPER: Check if two numbers are approximately equal
-;;; -------------------------------------------------------------------------
-(defun adim:approx= (a b fuzz)
-  (<= (abs (- a b)) fuzz)
-)
-
-;;; -------------------------------------------------------------------------
 ;;; HELPER: Segment Key for Duplicate Filtering
 ;;; -------------------------------------------------------------------------
 (defun adim:segment-key (p1 p2 / x1 y1 x2 y2)
@@ -75,23 +65,301 @@
 )
 
 ;;; -------------------------------------------------------------------------
-;;; HELPER: Extract vertices from LWPOLYLINE
+;;; HELPER: Extract polyline vertices AND bulges (for arc segments)
 ;;; -------------------------------------------------------------------------
-(defun adim:get-polyline-pts (ent / dxf pts isClosed)
+(defun adim:get-polyline-data (ent / dxf data isClosed item curPt curBulge)
   (setq dxf (entget ent))
-  (setq pts '())
+  (setq data '())
+  (setq isClosed (= (logand (cdr (assoc 70 dxf)) 1) 1))
+
+  (setq curPt nil curBulge 0.0)
   (foreach item dxf
-    (if (= (car item) 10)
-      (setq pts (cons (cdr item) pts))
+    (cond
+      ((= (car item) 10)
+       (if curPt
+         (setq data (cons (list curPt curBulge) data))
+       )
+       (setq curPt (cdr item)
+             curBulge 0.0)
+      )
+      ((= (car item) 42)
+       (setq curBulge (cdr item))
+      )
     )
   )
-  (setq pts (reverse pts))
-  (setq isClosed (= (logand (cdr (assoc 70 dxf)) 1) 1))
-  (list pts isClosed)
+  (if curPt
+    (setq data (cons (list curPt curBulge) data))
+  )
+  (list (reverse data) isClosed)
 )
 
 ;;; -------------------------------------------------------------------------
-;;; MODE 1: Bounding Box Auto-Dimensioning
+;;; HELPER: Calculate Radius, Center, and Arc Point from Polyline Bulge
+;;; -------------------------------------------------------------------------
+(defun adim:bulge-arc-info (p1 p2 b / d r midChord ang arcDir s ptOnArc center)
+  (setq d (distance p1 p2))
+  (if (or (< d 1e-4) (< (abs b) 1e-4))
+    nil
+    (progn
+      ;; Radius = d * (1 + b^2) / (4 * |b|)
+      (setq r (/ (* d (+ 1.0 (* b b))) (* 4.0 (abs b))))
+      (setq midChord (list (/ (+ (car p1) (car p2)) 2.0)
+                           (/ (+ (cadr p1) (cadr p2)) 2.0)
+                           0.0))
+      (setq ang (angle p1 p2))
+      ;; Direction from chord to arc curve
+      (setq arcDir (if (> b 0) (+ ang (/ pi 2.0)) (- ang (/ pi 2.0))))
+      ;; Sagitta (height of arc from chord) = (d / 2) * |b|
+      (setq s (* (/ d 2.0) (abs b)))
+      (setq ptOnArc (polar midChord arcDir s))
+      ;; Center is R distance from ptOnArc in opposite direction
+      (setq center (polar ptOnArc (- arcDir pi) r))
+      (list center r ptOnArc)
+    )
+  )
+)
+
+;;; -------------------------------------------------------------------------
+;;; MODE 1: Geometry & Segment Auto-Dimensioning
+;;; (Lines -> Aligned, Polyline Bulges/Arcs -> Radius, Circles -> Diameter)
+;;; -------------------------------------------------------------------------
+(defun adim:mode-segments (doc space ss / defOff userOff i ent entType dxf
+                                          p1 p2 polyInfo pData isClosed j pt1 b1 pt2
+                                          arcInfo center rad ptOnArc dimObj
+                                          processedKeys segCount arcCount cirCount
+                                          sa ea midAng chordPt)
+  (setq defOff (adim:default-offset))
+  (setq userOff (getdist (strcat "\nEnter linear segment offset distance <" (rtos defOff 2 1) ">: ")))
+  (if (or (null userOff) (<= userOff 0.0)) (setq userOff defOff))
+
+  (setq processedKeys '())
+  (setq segCount 0 arcCount 0 cirCount 0)
+
+  ;; Helper: Place straight line aligned dimension
+  (defun adim:add-seg-dim (pt1 pt2 / key dist ang midPt perp dimPt dimObj)
+    (setq dist (distance pt1 pt2))
+    (if (> dist 1e-3)
+      (progn
+        (setq key (adim:segment-key pt1 pt2))
+        (if (not (member key processedKeys))
+          (progn
+            (setq processedKeys (cons key processedKeys))
+            (setq ang (angle pt1 pt2))
+            (setq midPt (list (/ (+ (car pt1) (car pt2)) 2.0)
+                              (/ (+ (cadr pt1) (cadr pt2)) 2.0)
+                              0.0))
+            (setq perp (+ ang (/ pi 2.0)))
+            (setq dimPt (polar midPt perp userOff))
+
+            (setq dimObj
+              (vl-catch-all-apply
+                'vla-AddDimAligned
+                (list
+                  space
+                  (vlax-3d-point (list (car pt1) (cadr pt1) 0.0))
+                  (vlax-3d-point (list (car pt2) (cadr pt2) 0.0))
+                  (vlax-3d-point dimPt)
+                )
+              )
+            )
+            (if (not (vl-catch-all-error-p dimObj))
+              (progn
+                (vla-Update dimObj)
+                (setq segCount (1+ segCount))
+              )
+            )
+          )
+        )
+      )
+    )
+  )
+
+  ;; Loop over selected objects
+  (setq i 0)
+  (while (< i (sslength ss))
+    (setq ent (ssname ss i))
+    (setq dxf (entget ent))
+    (setq entType (cdr (assoc 0 dxf)))
+
+    (cond
+      ;; -------------------------------------------------------------------
+      ;; 1. LINE -> Aligned Dimension
+      ;; -------------------------------------------------------------------
+      ((= entType "LINE")
+       (setq p1 (cdr (assoc 10 dxf)))
+       (setq p2 (cdr (assoc 11 dxf)))
+       (adim:add-seg-dim p1 p2)
+      )
+
+      ;; -------------------------------------------------------------------
+      ;; 2. LWPOLYLINE -> Straight segments (Aligned) + Curved segments (Radius)
+      ;; -------------------------------------------------------------------
+      ((= entType "LWPOLYLINE")
+       (setq polyInfo (adim:get-polyline-data ent))
+       (setq pData (car polyInfo))
+       (setq isClosed (cadr polyInfo))
+
+       (if (>= (length pData) 2)
+         (progn
+           (setq j 0)
+           (while (< j (1- (length pData)))
+             (setq pt1 (car (nth j pData))
+                   b1  (cadr (nth j pData))
+                   pt2 (car (nth (1+ j) pData)))
+
+             (if (< (abs b1) 1e-4)
+               ;; Straight edge
+               (adim:add-seg-dim pt1 pt2)
+               ;; Curved edge (bulge) -> Radius Dimension
+               (progn
+                 (setq arcInfo (adim:bulge-arc-info pt1 pt2 b1))
+                 (if arcInfo
+                   (progn
+                     (setq center  (nth 0 arcInfo)
+                           rad     (nth 1 arcInfo)
+                           ptOnArc (nth 2 arcInfo))
+                     (setq dimObj
+                       (vl-catch-all-apply
+                         'vla-AddDimRadial
+                         (list
+                           space
+                           (vlax-3d-point (list (car center) (cadr center) 0.0))
+                           (vlax-3d-point (list (car ptOnArc) (cadr ptOnArc) 0.0))
+                           0.0
+                         )
+                       )
+                     )
+                     (if (not (vl-catch-all-error-p dimObj))
+                       (progn
+                         (vla-Update dimObj)
+                         (setq arcCount (1+ arcCount))
+                       )
+                     )
+                   )
+                 )
+               )
+             )
+             (setq j (1+ j))
+           )
+
+           ;; If closed polyline, handle closing segment
+           (if isClosed
+             (progn
+               (setq pt1 (car (last pData))
+                     b1  (cadr (last pData))
+                     pt2 (car (car pData)))
+               (if (< (abs b1) 1e-4)
+                 (adim:add-seg-dim pt1 pt2)
+                 (progn
+                   (setq arcInfo (adim:bulge-arc-info pt1 pt2 b1))
+                   (if arcInfo
+                     (progn
+                       (setq center  (nth 0 arcInfo)
+                             rad     (nth 1 arcInfo)
+                             ptOnArc (nth 2 arcInfo))
+                       (setq dimObj
+                         (vl-catch-all-apply
+                           'vla-AddDimRadial
+                           (list
+                             space
+                             (vlax-3d-point (list (car center) (cadr center) 0.0))
+                             (vlax-3d-point (list (car ptOnArc) (cadr ptOnArc) 0.0))
+                             0.0
+                           )
+                         )
+                       )
+                       (if (not (vl-catch-all-error-p dimObj))
+                         (progn
+                           (vla-Update dimObj)
+                           (setq arcCount (1+ arcCount))
+                         )
+                       )
+                     )
+                   )
+                 )
+               )
+             )
+           )
+         )
+       )
+      )
+
+      ;; -------------------------------------------------------------------
+      ;; 3. CIRCLE -> Diameter Dimension (⌀)
+      ;; -------------------------------------------------------------------
+      ((= entType "CIRCLE")
+       (setq center (cdr (assoc 10 dxf)))
+       (setq rad (cdr (assoc 40 dxf)))
+       (if (> rad 1e-4)
+         (progn
+           (setq pt1 (polar center (/ pi 4.0) rad))
+           (setq pt2 (polar center (+ (/ pi 4.0) pi) rad))
+           (setq dimObj
+             (vl-catch-all-apply
+               'vla-AddDimDiametric
+               (list
+                 space
+                 (vlax-3d-point (list (car pt1) (cadr pt1) 0.0))
+                 (vlax-3d-point (list (car pt2) (cadr pt2) 0.0))
+                 0.0
+               )
+             )
+           )
+           (if (not (vl-catch-all-error-p dimObj))
+             (progn
+               (vla-Update dimObj)
+               (setq cirCount (1+ cirCount))
+             )
+           )
+         )
+       )
+      )
+
+      ;; -------------------------------------------------------------------
+      ;; 4. ARC -> Radius Dimension (R)
+      ;; -------------------------------------------------------------------
+      ((= entType "ARC")
+       (setq center (cdr (assoc 10 dxf)))
+       (setq rad (cdr (assoc 40 dxf)))
+       (setq sa (cdr (assoc 50 dxf)))
+       (setq ea (cdr (assoc 51 dxf)))
+       (if (> rad 1e-4)
+         (progn
+           (if (< ea sa) (setq ea (+ ea (* 2.0 pi))))
+           (setq midAng (/ (+ sa ea) 2.0))
+           (setq chordPt (polar center midAng rad))
+           (setq dimObj
+             (vl-catch-all-apply
+               'vla-AddDimRadial
+               (list
+                 space
+                 (vlax-3d-point (list (car center) (cadr center) 0.0))
+                 (vlax-3d-point (list (car chordPt) (cadr chordPt) 0.0))
+                 0.0
+               )
+             )
+           )
+           (if (not (vl-catch-all-error-p dimObj))
+             (progn
+               (vla-Update dimObj)
+               (setq arcCount (1+ arcCount))
+             )
+           )
+         )
+       )
+      )
+    )
+    (setq i (1+ i))
+  )
+
+  (princ (strcat "\n✅ Dimensions Created:"
+                 "\n   • Linear Segments: " (itoa segCount)
+                 "\n   • Arc / Fillet Radii (R): " (itoa arcCount)
+                 "\n   • Circle Diameters (⌀): " (itoa cirCount)))
+)
+
+;;; -------------------------------------------------------------------------
+;;; MODE 2: Bounding Box Auto-Dimensioning
 ;;; -------------------------------------------------------------------------
 (defun adim:mode-box (doc space ss / minX minY maxX maxY i ent entObj
                                      minPt maxPt minL maxL defOff userPt
@@ -99,7 +367,7 @@
   (setq minX 1e99 minY 1e99 maxX -1e99 maxY -1e99)
   (setq count 0)
 
-  ;; 1. Compute overall bounding box
+  ;; Compute overall bounding box
   (setq i 0)
   (while (< i (sslength ss))
     (setq ent (ssname ss i))
@@ -136,7 +404,6 @@
           (setq dimLineX (car userPt))
         )
         (progn
-          ;; Default: Bottom and Left
           (setq dimLineY (- minY defOff))
           (setq dimLineX (- minX defOff))
         )
@@ -172,112 +439,19 @@
 )
 
 ;;; -------------------------------------------------------------------------
-;;; MODE 2: Individual Segment Dimensioning
-;;; -------------------------------------------------------------------------
-(defun adim:mode-segments (doc space ss / defOff userOff i ent entType
-                                          dxf p1 p2 polyInfo pts isClosed j
-                                          segCount processedKeys midPt ang perp
-                                          dimPt dimObj)
-  (setq defOff (adim:default-offset))
-  (setq userOff (getdist (strcat "\nEnter segment offset distance <" (rtos defOff 2 1) ">: ")))
-  (if (or (null userOff) (<= userOff 0.0)) (setq userOff defOff))
-
-  (setq processedKeys '())
-  (setq segCount 0)
-
-  ;; Process function for straight segment (p1 -> p2)
-  (defun adim:add-seg-dim (pt1 pt2 / key dist ang midPt perp dimPt dimObj)
-    (setq dist (distance pt1 pt2))
-    (if (> dist 1e-3)
-      (progn
-        (setq key (adim:segment-key pt1 pt2))
-        (if (not (member key processedKeys))
-          (progn
-            (setq processedKeys (cons key processedKeys))
-            (setq ang (angle pt1 pt2))
-            (setq midPt (list (/ (+ (car pt1) (car pt2)) 2.0)
-                              (/ (+ (cadr pt1) (cadr pt2)) 2.0)
-                              0.0))
-            ;; Offset perpendicular to line
-            (setq perp (+ ang (/ pi 2.0)))
-            (setq dimPt (polar midPt perp userOff))
-
-            (setq dimObj
-              (vl-catch-all-apply
-                'vla-AddDimAligned
-                (list
-                  space
-                  (vlax-3d-point (list (car pt1) (cadr pt1) 0.0))
-                  (vlax-3d-point (list (car pt2) (cadr pt2) 0.0))
-                  (vlax-3d-point dimPt)
-                )
-              )
-            )
-            (if (not (vl-catch-all-error-p dimObj))
-              (progn
-                (vla-Update dimObj)
-                (setq segCount (1+ segCount))
-              )
-            )
-          )
-        )
-      )
-    )
-  )
-
-  ;; Loop over selected objects
-  (setq i 0)
-  (while (< i (sslength ss))
-    (setq ent (ssname ss i))
-    (setq dxf (entget ent))
-    (setq entType (cdr (assoc 0 dxf)))
-
-    (cond
-      ;; LINE
-      ((= entType "LINE")
-       (setq p1 (cdr (assoc 10 dxf)))
-       (setq p2 (cdr (assoc 11 dxf)))
-       (adim:add-seg-dim p1 p2)
-      )
-
-      ;; LWPOLYLINE
-      ((= entType "LWPOLYLINE")
-       (setq polyInfo (adim:get-polyline-pts ent))
-       (setq pts (car polyInfo))
-       (setq isClosed (cadr polyInfo))
-       (if (>= (length pts) 2)
-         (progn
-           (setq j 0)
-           (while (< j (1- (length pts)))
-             (adim:add-seg-dim (nth j pts) (nth (1+ j) pts))
-             (setq j (1+ j))
-           )
-           (if isClosed
-             (adim:add-seg-dim (last pts) (car pts))
-           )
-         )
-       )
-      )
-    )
-    (setq i (1+ i))
-  )
-
-  (princ (strcat "\n✅ Created " (itoa segCount) " segment dimension(s)."))
-)
-
-;;; -------------------------------------------------------------------------
 ;;; MODE 3: Chain / Grid Dimensioning
 ;;; -------------------------------------------------------------------------
 (defun adim:mode-chain (doc space ss / defOff dir opt i ent dxf entType
                                        p1 p2 coords xList yList pickPt
-                                       dimLine basePos count overallObj dimObj)
+                                       dimLine basePos count overallObj dimObj
+                                       polyInfo pData pt)
   (initget "Horizontal Vertical Auto")
   (setq dir (getkword "\nChain direction [Horizontal/Vertical/Auto] <Auto>: "))
   (if (or (null dir) (= dir "Auto"))
     (setq dir "Auto")
   )
 
-  ;; Collect coordinate points from lines and polylines
+  ;; Collect coordinate points from lines, polylines, circles, arcs
   (setq coords '())
   (setq i 0)
   (while (< i (sslength ss))
@@ -291,20 +465,21 @@
        (setq coords (cons (cdr (assoc 11 dxf)) coords))
       )
       ((= entType "LWPOLYLINE")
-       (foreach pt (car (adim:get-polyline-pts ent))
-         (setq coords (cons pt coords))
+       (setq polyInfo (adim:get-polyline-data ent))
+       (foreach ptItem (car polyInfo)
+         (setq coords (cons (car ptItem) coords))
        )
       )
+      ((or (= entType "CIRCLE") (= entType "ARC"))
+       (setq coords (cons (cdr (assoc 10 dxf)) coords)) ; Center point
+      )
       (t
-       ;; Bounding box center as fallback for blocks / other entities
        (setq entObj (vlax-ename->vla-object ent))
        (if (not (vl-catch-all-error-p
                   (vl-catch-all-apply 'vla-GetBoundingBox (list entObj 'minPt 'maxPt))))
          (progn
-           (setq minL (vlax-safearray->list minPt))
-           (setq maxL (vlax-safearray->list maxPt))
-           (setq coords (cons minL coords))
-           (setq coords (cons maxL coords))
+           (setq coords (cons (vlax-safearray->list minPt) coords))
+           (setq coords (cons (vlax-safearray->list maxPt) coords))
          )
        )
       )
@@ -332,12 +507,9 @@
         )
       )
 
-      ;; -------------------------------------------------------------------
-      ;; Horizontal Chain (Measuring distances along X axis)
-      ;; -------------------------------------------------------------------
+      ;; Horizontal Chain (X axis)
       (if (= dir "Horizontal")
         (progn
-          ;; Extract unique sorted X coordinates (with 0.01 tolerance)
           (setq rawX (vl-sort (mapcar 'car coords) '<))
           (setq cleanX (list (car rawX)))
           (foreach x (cdr rawX)
@@ -357,7 +529,6 @@
                 (setq dimLine (cadr pickPt))
               )
 
-              ;; Place chain dimensions
               (setq count 0)
               (setq i 0)
               (while (< i (1- (length cleanX)))
@@ -377,7 +548,7 @@
                 (setq i (1+ i))
               )
 
-              ;; Overall total dimension
+              ;; Overall dimension
               (setq overallObj
                 (vla-AddDimRotated
                   space
@@ -395,11 +566,8 @@
           )
         )
 
-        ;; -----------------------------------------------------------------
-        ;; Vertical Chain (Measuring distances along Y axis)
-        ;; -----------------------------------------------------------------
+        ;; Vertical Chain (Y axis)
         (progn
-          ;; Extract unique sorted Y coordinates
           (setq rawY (vl-sort (mapcar 'cadr coords) '<))
           (setq cleanY (list (car rawY)))
           (foreach y (cdr rawY)
@@ -419,12 +587,11 @@
                 (setq dimLine (car pickPt))
               )
 
-              ;; Place vertical chain dimensions
               (setq count 0)
               (setq i 0)
               (while (< i (1- (length cleanY)))
                 (setq y1 (nth i cleanY)
-                      y2 (nth (1+ cleanY) cleanY))
+                      y2 (nth (1+ i) cleanY))
                 (setq dimObj
                   (vla-AddDimRotated
                     space
@@ -439,7 +606,7 @@
                 (setq i (1+ i))
               )
 
-              ;; Overall vertical dimension
+              ;; Overall dimension
               (setq overallObj
                 (vla-AddDimRotated
                   space
@@ -515,19 +682,19 @@
   ;; -------------------------------------------------------------------------
   ;; 3. Choose Auto-Dimensioning Mode
   ;; -------------------------------------------------------------------------
-  (initget "Box Segments Chain")
-  (setq mode (getkword "\nChoose Dimension Mode [Box (Overall)/Segments (Each line)/Chain (Continuous)] <Box>: "))
-  (if (null mode) (setq mode "Box"))
+  (initget "Segments Box Chain")
+  (setq mode (getkword "\nChoose Dimension Mode [Segments (Lines/Curves/Circles)/Box (Overall)/Chain (Continuous)] <Segments>: "))
+  (if (null mode) (setq mode "Segments"))
 
   ;; Start Undo Mark
   (vla-StartUndoMark doc)
 
   (cond
-    ((= mode "Box")
-     (adim:mode-box doc space ss)
-    )
     ((= mode "Segments")
      (adim:mode-segments doc space ss)
+    )
+    ((= mode "Box")
+     (adim:mode-box doc space ss)
     )
     ((= mode "Chain")
      (adim:mode-chain doc space ss)
@@ -560,6 +727,6 @@
 ;;; Load Notification
 ;;; -------------------------------------------------------------------------
 (princ "\n📦 AUTODIM.lsp loaded successfully!")
-(princ "\n   Type 'ADIM' or 'AUTODIM' (or 'AD') to start auto-dimensioning.")
-(princ "\n   Modes: [B]ox (Overall Width/Height), [S]egments (Each line), [C]hain (Continuous).")
+(princ "\n   Type 'ADIM' or 'AD' to start auto-dimensioning.")
+(princ "\n   Automatically handles Lines (Linear), Arcs/Fillets (Radius R), Circles (Diameter ⌀), and Overall Box!")
 (princ)
