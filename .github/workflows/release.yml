@@ -2,14 +2,11 @@ name: Publish LISP Release Assets
 
 on:
   push:
+    branches:
+      - main
     tags:
       - "v*"
   workflow_dispatch:
-    inputs:
-      tag_name:
-        description: "Release Tag Name (e.g. v1.0.0)"
-        required: true
-        default: "v1.0.0"
 
 permissions:
   contents: write
@@ -23,7 +20,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Prepare Individual Downloadable LISP Files
+      - name: Prepare Individual Downloadable LISP Files & Zips
         run: |
           mkdir -p release-assets
           
@@ -37,45 +34,36 @@ jobs:
           cp "LISP/Published/TCOUNT_PLUS/TCOUNT_PLUS.lsp" "release-assets/TCOUNT_PLUS.lsp"
           cp "LISP/Published/XLINE/XLINE_ALL.lsp" "release-assets/XLINE_ALL.lsp"
 
-          # Create an all-in-one bundle zip containing all published tools
-          cd release-assets
-          zip -9 All-Published-LISP-Tools.zip *.lsp
-          cd ..
+          # Copy individual zip packages
+          if [ -d "Downloads" ]; then
+            cp Downloads/*.zip release-assets/
+          fi
 
           echo "Prepared release assets:"
           ls -la release-assets
 
-      - name: Determine Tag
-        id: get_tag
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "tag=${{ github.event.inputs.tag_name }}" >> $GITHUB_OUTPUT
-          else
-            echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Create GitHub Release with Assets
+      - name: Create or Update GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.get_tag.outputs.tag }}
-          name: "AutoCAD LISP Tools ${{ steps.get_tag.outputs.tag }}"
+          tag_name: "v1.0.0"
+          name: "AutoCAD LISP Tools v1.0.0 (Published & Tested)"
           body: |
             ## 🚀 Production-Ready AutoCAD LISP Tools
 
-            Download individual `.lsp` files below or grab the complete bundle:
+            Click any of the `.zip` or `.lsp` assets below to download directly to your computer!
 
-            ### 📦 Individual Tools (Click to Download):
-            - [📥 **ATTFIX.lsp**](https://github.com/${{ github.repository }}/releases/download/${{ steps.get_tag.outputs.tag }}/ATTFIX.lsp) — Instant Attribute Value, Tag & Prompt synchronizer (`AF`, `ATTFIX`)
-            - [📥 **BLOCK_RENAMER.lsp**](https://github.com/${{ github.repository }}/releases/download/${{ steps.get_tag.outputs.tag }}/BLOCK_RENAMER.lsp) — On-screen & batch block renamer (`BRN`, `BNAME`)
-            - [📥 **MTEXT2ATTR.lsp**](https://github.com/${{ github.repository }}/releases/download/${{ steps.get_tag.outputs.tag }}/MTEXT2ATTR.lsp) — In-place Text/MText to ATTDEF conversion (`M2A`, `MT2ATT`)
-            - [📥 **TCOUNT_PLUS.lsp**](https://github.com/${{ github.repository }}/releases/download/${{ steps.get_tag.outputs.tag }}/TCOUNT_PLUS.lsp) — Advanced directional renumbering (`TC`, `TCOUNTPLUS`)
-            - [📥 **XLINE_ALL.lsp**](https://github.com/${{ github.repository }}/releases/download/${{ steps.get_tag.outputs.tag }}/XLINE_ALL.lsp) — Multi-spaced construction lines (`XVN`, `XHN`, `XH`, `XV`)
-            - [📥 **Selection.lsp**](https://github.com/${{ github.repository }}/releases/download/${{ steps.get_tag.outputs.tag }}/Selection.lsp) — Fast object selection helpers (`SA`, `SAT`, `SAL`, etc.)
-            - [📥 **HIDE_SHOW.lsp**](https://github.com/${{ github.repository }}/releases/download/${{ steps.get_tag.outputs.tag }}/HIDE_SHOW.lsp) — Hide/Isolate/Restore visibility (`HH`, `IL`, `HR`)
-            - [📥 **CREATE_SIMILAR.lsp**](https://github.com/${{ github.repository }}/releases/download/${{ steps.get_tag.outputs.tag }}/CREATE_SIMILAR.lsp) — Create matching element properties (`CS`)
+            ### 📦 Individual Tools:
+            - **ATTFIX** (`AF`, `ATTFIX`) — Instant Attribute Value, Tag & Prompt synchronizer
+            - **BLOCK_RENAMER** (`BRN`, `BNAME`) — On-screen & batch block renamer
+            - **MTEXT2ATTR** (`M2A`, `MT2ATT`) — In-place Text/MText to ATTDEF conversion
+            - **TCOUNT_PLUS** (`TC`, `TCOUNTPLUS`) — Advanced directional renumbering
+            - **XLINE_ALL** (`XVN`, `XHN`, `XH`, `XV`) — Multi-spaced construction lines
+            - **Selection** (`SA`, `SAT`, `SAL`, etc.) — Fast object selection helpers
+            - **HIDE_SHOW** (`HH`, `IL`, `HR`) — Hide/Isolate/Restore visibility
+            - **CREATE_SIMILAR** (`CS`) — Create matching element properties
 
-            ### 🗂️ Complete Bundle:
-            - [📦 **All-Published-LISP-Tools.zip**](https://github.com/${{ github.repository }}/releases/download/${{ steps.get_tag.outputs.tag }}/All-Published-LISP-Tools.zip) — Contains all published `.lsp` tools in one download.
+            ### 🗂️ All-in-One:
+            - **All-Published-LISP-Tools.zip** — All published `.lsp` tools in one bundle.
           files: release-assets/*
           draft: false
           prerelease: false
