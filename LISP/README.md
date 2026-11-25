@@ -34,16 +34,16 @@ LISP/
 
 All tools below are located in [`/Published/`](./Published/) and verified for daily production:
 
-| Toolset | Core Commands | Description | Documentation |
-|---|---|---|---|
-| **[XLINE](./Published/XLINE/)** | `XVN`, `XHN`, `XH`, `XV`, `XA`, `XB`, `XO` | Multi-spaced construction lines with cursor direction detection, fast axis shortcuts. | [View Details](./Published/XLINE/README.md) |
-| **[TCOUNT_PLUS](./Published/TCOUNT_PLUS/)** | `TC`, `TCOUNTPLUS` | Advanced directional renumbering tool (LR, RL, TB, BT, Selection order) with prefix, suffix & leading zeros. | [View Details](./Published/TCOUNT_PLUS/README.md) |
-| **[ATTFIX](./Published/ATTFIX/)** | `ATTFIX`, `AF` | Batch attribute synchronizer: Instantly updates Tag & Prompt based on Value (supports pre/post selection). | [View Details](./Published/ATTFIX/README.md) |
-| **[BLOCK_RENAMER](./Published/BLOCK_RENAMER/)** | `BRN`, `BNAME`, `BLOCKRENAME` | Fast block renamer: Click-to-rename on screen, dynamic block safe, batch Find & Replace, Prefix & Suffix. | [View Details](./Published/BLOCK_RENAMER/README.md) |
-| **[MTEXT_TO_ATTR](./Published/MTEXT_TO_ATTR/)** | `MT2ATT`, `M2A`, `T2A` | Batch-converts Text and MText objects into Attribute Definitions (`ATTDEF`) in-place. Works inside **Block Editor (`BEDIT`)**. | [View Details](./Published/MTEXT_TO_ATTR/README.md) |
-| **[SELECTION](./Published/SELECTION/)** | `SA`, `SAT`, `SAL`, `SAC`, `SAB`, `SLT`, `SAA` | High-speed selection of similar objects by layer, entity type, color, or block definition. | [View Details](./Published/SELECTION/README.md) |
-| **[HIDE_SHOW](./Published/HIDE_SHOW/)** | `HH`, `IL`, `HR` | Temporarily isolate/hide and restore drawing elements for clutter-free drafting. | [View Details](./Published/HIDE_SHOW/README.md) |
-| **[Create Similar](./Published/Create%20Similar/)** | `CS` | Create matching elements based on selected entity properties. | [View Details](./Published/Create%20Similar/) |
+| Toolset | Core Commands | Description | Download | Documentation |
+|---|---|---|---|---|
+| **[XLINE](./Published/XLINE/)** | `XVN`, `XHN`, `XH`, `XV`, `XA`, `XB`, `XO` | Multi-spaced construction lines with cursor direction detection, fast axis shortcuts. | [📥 `XLINE_ALL.lsp`](https://github.com/PRADUL-P/Tools-for-AutoCAD/raw/main/LISP/Published/XLINE/XLINE_ALL.lsp) | [View Details](./Published/XLINE/README.md) |
+| **[TCOUNT_PLUS](./Published/TCOUNT_PLUS/)** | `TC`, `TCOUNTPLUS` | Advanced directional renumbering tool (LR, RL, TB, BT, Selection order) with prefix, suffix & leading zeros. | [📥 `TCOUNT_PLUS.lsp`](https://github.com/PRADUL-P/Tools-for-AutoCAD/raw/main/LISP/Published/TCOUNT_PLUS/TCOUNT_PLUS.lsp) | [View Details](./Published/TCOUNT_PLUS/README.md) |
+| **[ATTFIX](./Published/ATTFIX/)** | `ATTFIX`, `AF` | Batch attribute synchronizer: Instantly updates Tag & Prompt based on Value (supports pre/post selection). | [📥 `ATTFIX.lsp`](https://github.com/PRADUL-P/Tools-for-AutoCAD/raw/main/LISP/Published/ATTFIX/ATTFIX.lsp) | [View Details](./Published/ATTFIX/README.md) |
+| **[BLOCK_RENAMER](./Published/BLOCK_RENAMER/)** | `BRN`, `BNAME`, `BLOCKRENAME` | Fast block renamer: Click-to-rename on screen, dynamic block safe, batch Find & Replace, Prefix & Suffix. | [📥 `BLOCK_RENAMER.lsp`](https://github.com/PRADUL-P/Tools-for-AutoCAD/raw/main/LISP/Published/BLOCK_RENAMER/BLOCK_RENAMER.lsp) | [View Details](./Published/BLOCK_RENAMER/README.md) |
+| **[MTEXT_TO_ATTR](./Published/MTEXT_TO_ATTR/)** | `MT2ATT`, `M2A`, `T2A` | Batch-converts Text and MText objects into Attribute Definitions (`ATTDEF`) in-place. Works inside **Block Editor (`BEDIT`)**. | [📥 `MTEXT2ATTR.lsp`](https://github.com/PRADUL-P/Tools-for-AutoCAD/raw/main/LISP/Published/MTEXT_TO_ATTR/MTEXT2ATTR.lsp) | [View Details](./Published/MTEXT_TO_ATTR/README.md) |
+| **[SELECTION](./Published/SELECTION/)** | `SA`, `SAT`, `SAL`, `SAC`, `SAB`, `SLT`, `SAA` | High-speed selection of similar objects by layer, entity type, color, or block definition. | [📥 `Selection.lsp`](https://github.com/PRADUL-P/Tools-for-AutoCAD/raw/main/LISP/Published/SELECTION/Selection.lsp) | [View Details](./Published/SELECTION/README.md) |
+| **[HIDE_SHOW](./Published/HIDE_SHOW/)** | `HH`, `IL`, `HR` | Temporarily isolate/hide and restore drawing elements for clutter-free drafting. | [📥 `HIDE_SHOW.LSP`](https://github.com/PRADUL-P/Tools-for-AutoCAD/raw/main/LISP/Published/HIDE_SHOW/HIDE_SHOW.LSP) | [View Details](./Published/HIDE_SHOW/README.md) |
+| **[Create Similar](./Published/Create%20Similar/)** | `CS` | Create matching elements based on selected entity properties. | [📥 `CREATE SIMILAR.LSP`](https://github.com/PRADUL-P/Tools-for-AutoCAD/raw/main/LISP/Published/Create%20Similar/CREATE%20SIMILAR.LSP) | [View Details](./Published/Create%20Similar/) |
 
 ---
 

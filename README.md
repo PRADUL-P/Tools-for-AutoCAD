@@ -1,5 +1,9 @@
 # 🛠️ Tools for AutoCAD
 
+[![Latest Release](https://img.shields.io/github/v/release/PRADUL-P/Tools-for-AutoCAD?color=brightgreen&label=Release&logo=github)](https://github.com/PRADUL-P/Tools-for-AutoCAD/releases)
+[![AutoCAD Compatibility](https://img.shields.io/badge/AutoCAD-2018%20--%202026-blue?logo=autodesk)](https://github.com/PRADUL-P/Tools-for-AutoCAD)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 > 🔧 **Tools for AutoCAD** is a curated collection of production-grade **AutoLISP scripts and automation tools** designed to supercharge your CAD workflow. Built with a focus on **efficiency, precision, and practical field use**, this repository enables engineers, architects, and drafters to eliminate repetitive tasks, automate complex drawings, and speed up project delivery.
 
 > 🧠 Unlock **CAD automation directly within AutoCAD** — 100% native AutoLISP, zero third-party plugins required. All published tools are **100% tested and verified** for daily production drafting.
