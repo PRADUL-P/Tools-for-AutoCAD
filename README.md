@@ -34,18 +34,19 @@ Tools-for-AutoCAD/
 
 ## 🟢 Published & Tested Tools (Production-Ready)
 
-All tools in this section have been personally tested and verified in real drafting workflows:
+All tools in this section have been personally tested and verified in real drafting workflows.  
+👉 **[View All GitHub Releases & Bundles](https://github.com/PRADUL-P/Tools-for-AutoCAD/releases)**
 
-| Toolset | Commands | Description | Folder |
-|---|---|---|---|
-| **Construction Lines** | `XVN`, `XHN`, `XH`, `XV`, `XA`, `XB`, `XO` | Extended XLINE tools. Includes **arraying multiple vertical/horizontal construction lines** with custom spacing and cursor-direction detection. | [`/LISP/Published/XLINE/`](./LISP/Published/XLINE/) |
-| **Directional Renumbering** | `TC`, `TCOUNTPLUS` | Enhanced replacement for Express Tool `TCOUNT`. Renumber text/attributes in **any direction** (`LR`, `RL`, `TB`, `BT`, `SEL`), with simultaneous prefix, suffix, and leading zero padding. | [`/LISP/Published/TCOUNT_PLUS/`](./LISP/Published/TCOUNT_PLUS/) |
-| **Attribute Synchronizer** | `ATTFIX`, `AF` | Instantly updates **Tag and Prompt** based on **Value** for all selected blocks (supports pre- and post-selection). | [`/LISP/Published/ATTFIX/`](./LISP/Published/ATTFIX/) |
-| **Block Renamer** | `BRN`, `BNAME`, `BLOCKRENAME` | Fast block renamer: Click-to-rename on screen, dynamic block safe, batch Find & Replace, Prefix & Suffix. | [`/LISP/Published/BLOCK_RENAMER/`](./LISP/Published/BLOCK_RENAMER/) |
-| **Text/MText to Attribute** | `MT2ATT`, `M2A`, `T2A` | Batch-converts single-line Text and MText into Attribute Definitions (`ATTDEF`) in-place. Fully compatible with **Block Editor (`BEDIT`)**, preserves styles, layers, colors, and justifications. | [`/LISP/Published/MTEXT_TO_ATTR/`](./LISP/Published/MTEXT_TO_ATTR/) |
-| **Selection Tools** | `SA`, `SAT`, `SAL`, `SAC`, `SAB`, `SLT`, `SAA` | Fast selection and filtering of similar objects by layer, entity type, color, or block name. | [`/LISP/Published/SELECTION/`](./LISP/Published/SELECTION/) |
-| **Visibility Management**| `HH`, `IL`, `HR` | Temporarily isolate/hide and restore visibility of selected drawing elements. | [`/LISP/Published/HIDE_SHOW/`](./LISP/Published/HIDE_SHOW/) |
-| **Create Similar** | `CS` | Quickly spawn new entities matching existing element properties (ADDSELECTED wrapper). | [`/LISP/Published/Create Similar/`](./LISP/Published/Create%20Similar/) |
+| Toolset | Commands | Description | Download | Documentation |
+|---|---|---|---|---|
+| **Construction Lines** | `XVN`, `XHN`, `XH`, `XV`, `XA`, `XB`, `XO` | Extended XLINE tools. Includes **arraying multiple vertical/horizontal construction lines** with custom spacing and cursor-direction detection. | [📥 `XLINE_ALL.lsp`](https://github.com/PRADUL-P/Tools-for-AutoCAD/raw/main/LISP/Published/XLINE/XLINE_ALL.lsp) | [`/XLINE/`](./LISP/Published/XLINE/) |
+| **Directional Renumbering** | `TC`, `TCOUNTPLUS` | Enhanced replacement for Express Tool `TCOUNT`. Renumber text/attributes in **any direction** (`LR`, `RL`, `TB`, `BT`, `SEL`), with simultaneous prefix, suffix, and leading zero padding. | [📥 `TCOUNT_PLUS.lsp`](https://github.com/PRADUL-P/Tools-for-AutoCAD/raw/main/LISP/Published/TCOUNT_PLUS/TCOUNT_PLUS.lsp) | [`/TCOUNT_PLUS/`](./LISP/Published/TCOUNT_PLUS/) |
+| **Attribute Synchronizer** | `ATTFIX`, `AF` | Instantly updates **Tag and Prompt** based on **Value** for all selected blocks (supports pre- and post-selection). | [📥 `ATTFIX.lsp`](https://github.com/PRADUL-P/Tools-for-AutoCAD/raw/main/LISP/Published/ATTFIX/ATTFIX.lsp) | [`/ATTFIX/`](./LISP/Published/ATTFIX/) |
+| **Block Renamer** | `BRN`, `BNAME`, `BLOCKRENAME` | Fast block renamer: Click-to-rename on screen, dynamic block safe, batch Find & Replace, Prefix & Suffix. | [📥 `BLOCK_RENAMER.lsp`](https://github.com/PRADUL-P/Tools-for-AutoCAD/raw/main/LISP/Published/BLOCK_RENAMER/BLOCK_RENAMER.lsp) | [`/BLOCK_RENAMER/`](./LISP/Published/BLOCK_RENAMER/) |
+| **Text/MText to Attribute** | `MT2ATT`, `M2A`, `T2A` | Batch-converts single-line Text and MText into Attribute Definitions (`ATTDEF`) in-place. Fully compatible with **Block Editor (`BEDIT`)**, preserves styles, layers, colors, and justifications. | [📥 `MTEXT2ATTR.lsp`](https://github.com/PRADUL-P/Tools-for-AutoCAD/raw/main/LISP/Published/MTEXT_TO_ATTR/MTEXT2ATTR.lsp) | [`/MTEXT_TO_ATTR/`](./LISP/Published/MTEXT_TO_ATTR/) |
+| **Selection Tools** | `SA`, `SAT`, `SAL`, `SAC`, `SAB`, `SLT`, `SAA` | Fast selection and filtering of similar objects by layer, entity type, color, or block name. | [📥 `Selection.lsp`](https://github.com/PRADUL-P/Tools-for-AutoCAD/raw/main/LISP/Published/SELECTION/Selection.lsp) | [`/SELECTION/`](./LISP/Published/SELECTION/) |
+| **Visibility Management**| `HH`, `IL`, `HR` | Temporarily isolate/hide and restore visibility of selected drawing elements. | [📥 `HIDE_SHOW.LSP`](https://github.com/PRADUL-P/Tools-for-AutoCAD/raw/main/LISP/Published/HIDE_SHOW/HIDE_SHOW.LSP) | [`/HIDE_SHOW/`](./LISP/Published/HIDE_SHOW/) |
+| **Create Similar** | `CS` | Quickly spawn new entities matching existing element properties (ADDSELECTED wrapper). | [📥 `CREATE SIMILAR.LSP`](https://github.com/PRADUL-P/Tools-for-AutoCAD/raw/main/LISP/Published/Create%20Similar/CREATE%20SIMILAR.LSP) | [`/Create Similar/`](./LISP/Published/Create%20Similar/) |
 
 ---
 
